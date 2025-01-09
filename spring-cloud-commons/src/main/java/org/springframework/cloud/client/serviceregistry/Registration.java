@@ -19,7 +19,7 @@ package org.springframework.cloud.client.serviceregistry;
 import org.springframework.cloud.client.ServiceInstance;
 
 /**
- * A marker interface used by a {@link ServiceRegistry}.
+ * 被{@link ServiceRegistry}所使用的标记接口
  *
  * @author Spencer Gibb
  * @since 1.2.0

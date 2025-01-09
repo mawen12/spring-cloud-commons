@@ -20,20 +20,28 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 
 /**
+ * Spring Cloud服务发现中客户端的健康指示器的属性，
+ * 从 PROPERTIES(spring.cloud.discovery.client.health-indicator) 读取
+ *
  * @author Spencer Gibb
  */
 @ConfigurationProperties("spring.cloud.discovery.client.health-indicator")
 public class DiscoveryClientHealthIndicatorProperties {
 
+	/**
+	 * 是否开启，默认为true
+	 */
 	private boolean enabled = true;
 
+	/**
+	 * 是否包含描述，默认为false
+	 */
 	private boolean includeDescription = false;
 
 	/**
-	 * Whether or not the indicator should use {@link DiscoveryClient#getServices} to
-	 * check its health. When set to {@code false} the indicator instead uses the lighter
-	 * {@link DiscoveryClient#probe()}. This can be helpful in large deployments where the
-	 * number of services returned makes the operation unnecessarily heavy.
+	 * 是否使用{@link DiscoveryClient#getServices()}来检查其健康状态，默认为true。
+	 * 如果为false，则代表使用{@link DiscoveryClient#probe()}来检查健康状态，因为用户可以覆盖该方法，
+	 * 所以该方法的性能影响可能会更小
 	 */
 	private boolean useServicesQuery = true;
 

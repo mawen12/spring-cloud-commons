@@ -31,6 +31,9 @@ import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.type.AnnotationMetadata;
 
 /**
+ * 开启服务发现客户端，负责解析{@link EnableDiscoveryClient}注解，并根据对应属性值加载不同的行为。
+ * 默认下自动进行服务注册
+ *
  * @author Spencer Gibb
  */
 @Order(Ordered.LOWEST_PRECEDENCE - 100)
@@ -40,22 +43,36 @@ public class EnableDiscoveryClientImportSelector extends SpringFactoryImportSele
 	public String[] selectImports(AnnotationMetadata metadata) {
 		String[] imports = super.selectImports(metadata);
 
-		AnnotationAttributes attributes = AnnotationAttributes
-			.fromMap(metadata.getAnnotationAttributes(getAnnotationClass().getName(), true));
+		/**
+		 * 读取注解{@link EnableDiscoveryClient}中的属性值
+		 */
+		AnnotationAttributes attributes = AnnotationAttributes.fromMap(metadata.getAnnotationAttributes(getAnnotationClass().getName(), true));
 
+		/**
+		 * 获取{@link EnableDiscoveryClient#autoRegister()}的值
+		 */
 		boolean autoRegister = attributes.getBoolean("autoRegister");
 
 		if (autoRegister) {
+			/**
+			 * 如果开启自动注册，则将类{@link org.springframework.cloud.client.serviceregistry.AutoServiceRegistrationConfiguration}加入进来
+			 */
 			List<String> importsList = new ArrayList<>(Arrays.asList(imports));
 			importsList.add("org.springframework.cloud.client.serviceregistry.AutoServiceRegistrationConfiguration");
 			imports = importsList.toArray(new String[0]);
 		}
 		else {
+			/**
+			 * 未开启自动注册，将该属性值写入到PROPERTIES(spring.cloud.service-registry.autp-registration.enabled)=false中
+			 */
 			Environment env = getEnvironment();
 			if (env instanceof ConfigurableEnvironment configEnv) {
 				LinkedHashMap<String, Object> map = new LinkedHashMap<>();
 				map.put("spring.cloud.service-registry.auto-registration.enabled", false);
 				MapPropertySource propertySource = new MapPropertySource("springCloudDiscoveryClient", map);
+				/**
+				 * 将其作为属性源加入到最末端
+				 */
 				configEnv.getPropertySources().addLast(propertySource);
 			}
 
@@ -66,6 +83,9 @@ public class EnableDiscoveryClientImportSelector extends SpringFactoryImportSele
 
 	@Override
 	protected boolean isEnabled() {
+		/**
+		 * 解析是否开启服务发现，从 PROPERTIES(spring.cloud.discovery.enabled) -> DEFAULT(true)
+		 */
 		return getEnvironment().getProperty("spring.cloud.discovery.enabled", Boolean.class, Boolean.TRUE);
 	}
 

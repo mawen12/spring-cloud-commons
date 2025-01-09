@@ -24,8 +24,7 @@ import java.util.Queue;
 import org.springframework.cloud.client.ServiceInstance;
 
 /**
- * A {@link List} implementation that lazily fills weighted {@link ServiceInstance}
- * objects.
+ * 延迟填充带有权重的实例对象
  *
  * @author Zhuozhi Ji
  * @see WeightedServiceInstanceListSupplier
@@ -36,6 +35,9 @@ class LazyWeightedServiceInstanceList extends AbstractList<ServiceInstance> {
 
 	private final Object expandingLock = new Object();
 
+	/**
+	 * 带有服务实例权重的选择器
+	 */
 	private WeightedServiceInstanceSelector selector;
 
 	private volatile int position = 0;
@@ -83,6 +85,9 @@ class LazyWeightedServiceInstanceList extends AbstractList<ServiceInstance> {
 		return a;
 	}
 
+	/**
+	 * 基于权重的服务实例选择器
+	 */
 	static class WeightedServiceInstanceSelector {
 
 		Queue<Entry> active;

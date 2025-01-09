@@ -24,6 +24,11 @@ import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpResponse;
 
 /**
+ * 负载均衡请求工厂，负责构造{@link LoadBalancerRequest}。
+ * 在构造时，将{@link LoadBalancerRequestTransformer}应用到请求上，来对请求进行扩展。
+ * 并且支持{@link LoadBalancerInterceptor}和{@link RetryLoadBalancerInterceptor}来拦截请求。
+ *
+ *
  * Creates {@link LoadBalancerRequest}s for {@link LoadBalancerInterceptor} and
  * {@link RetryLoadBalancerInterceptor}. Applies {@link LoadBalancerRequestTransformer}s
  * to the intercepted {@link HttpRequest}.
@@ -51,8 +56,7 @@ public class LoadBalancerRequestFactory {
 
 	public LoadBalancerRequest<ClientHttpResponse> createRequest(final HttpRequest request, final byte[] body,
 			final ClientHttpRequestExecution execution) {
-		return new BlockingLoadBalancerRequest(loadBalancer, transformers,
-				new BlockingLoadBalancerRequest.ClientHttpRequestData(request, body, execution));
+		return new BlockingLoadBalancerRequest(loadBalancer, transformers, new BlockingLoadBalancerRequest.ClientHttpRequestData(request, body, execution));
 	}
 
 }

@@ -21,13 +21,16 @@ import java.util.Objects;
 import org.springframework.core.style.ToStringCreator;
 
 /**
- * A default implementation of {@link Request}.
+ * 默认的{@link Request}实现
  *
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
  */
 public class DefaultRequest<T> implements Request<T> {
 
+	/**
+	 * 请求体
+	 */
 	private T context;
 
 	public DefaultRequest() {

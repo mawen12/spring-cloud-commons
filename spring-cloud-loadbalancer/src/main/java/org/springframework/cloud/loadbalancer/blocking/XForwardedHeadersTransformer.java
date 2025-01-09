@@ -24,11 +24,22 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 
 /**
- * To add X-Forwarded-Host and X-Forwarded-Proto Headers.
+ * XForward请求头转换器，用于向{@link HttpRequest}添加以下请求头：
+ * <ul>
+ *     <li>X-Forwarded-Host</li>
+ *     <li>X-Forwarded-Proto</li>
+ * </ul>
+ * <p>
+ * XForward是一种标准请求头，用于标识客户端通过代理连接到服务器的原始IP地址
+ * X-Forwarded-Host是一种标准请求头，用于标识客户端发出请求的原始主机
+ * X-Forwarded-Proto是一种标准请求头，用于标识客户端连接到代理或负载均衡器时的协议（HTTP/HTTPS）
  *
  * @author Gandhimathi Velusamy
  * @author Olga Maciaszek-Sharma
  * @author junjie shen(沈俊杰)
+ * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For">X-Forwareded-For</a>
+ * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-Host">X-Forwared-Host</a>
+ * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-Proto">X-Forwared-Proto</a>
  * @since 3.1.0
  */
 
@@ -45,8 +56,14 @@ public class XForwardedHeadersTransformer implements LoadBalancerRequestTransfor
 		if (instance == null) {
 			return request;
 		}
+		/**
+		 * 读取该服务下的 PROPERTIES(xForwarded)
+		 */
 		LoadBalancerProperties.XForwarded xForwarded = factory.getProperties(instance.getServiceId()).getXForwarded();
 		if (xForwarded.isEnabled()) {
+			/**
+			 * 如果启用了xForwared,则获取主机与协议，并分别写入X-Forwarded-Host和X-Forwarded-Proto请求头
+			 */
 			HttpHeaders headers = request.getHeaders();
 			String xForwardedHost = request.getURI().getHost();
 			String xForwardedProto = request.getURI().getScheme();

@@ -27,9 +27,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 /**
- * Provides a more succinct conditional
- * <code>spring.cloud.discovery.reactive.enabled</code>. Also takes into account whether
- * or not `WebClient` is on the classpath.
+ * 前提条件为 CLASS(org.springframework.web.reactive.function.client.WebClient)
+ * 提供 PROPERTIES(spring.cloud.discovery.reactive.enabled)=true
  *
  * @author Tim Ysewyn
  * @since 2.2.0

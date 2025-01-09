@@ -26,11 +26,20 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
+ * 服务注册自动配置
+ *
  * @author Spencer Gibb
  */
 @Configuration(proxyBeanMethods = false)
 public class ServiceRegistryAutoConfiguration {
 
+	/**
+	 * 服务注册端点配置，开启的条件如下：
+	 * <ul>
+	 *     <li>BEAN(ServiceRegistry)</li>
+	 *     <li>CLASS(Endpoint)</li>
+	 * </ul>
+	 */
 	@ConditionalOnBean(ServiceRegistry.class)
 	@ConditionalOnClass(Endpoint.class)
 	protected class ServiceRegistryEndpointConfiguration {

@@ -21,8 +21,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpRequest;
 
 /**
- * Allows applications to transform the load-balanced {@link HttpRequest} given the chosen
- * {@link ServiceInstance}.
+ * 负载均衡请求转换器，允许使用给定的{@link ServiceInstance}来转换负载均衡的{@link HttpRequest}
  *
  * @author Will Tran
  */

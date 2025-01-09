@@ -6,13 +6,13 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-commons-parent</artifactId>
-		<version>4.2.1-SNAPSHOT</version>
+		<version>4.2.0</version>
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>spring-cloud-loadbalancer</artifactId>
 	<packaging>jar</packaging>
 	<name>Spring Cloud Load Balancer</name>
-	<description>Spring Cloud Balancer</description>
+	<description>Spring Cloud 负载均衡</description>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>

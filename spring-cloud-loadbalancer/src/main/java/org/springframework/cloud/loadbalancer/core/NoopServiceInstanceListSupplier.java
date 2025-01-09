@@ -25,7 +25,7 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.Request;
 
 /**
- * A no-op implementation of {@link ServiceInstanceListSupplier}.
+ * 空响应的{@link ServiceInstanceListSupplier}实现，即返回空的服务实例集合
  *
  * @author Olga Maciaszek-Sharma
  */
@@ -43,6 +43,9 @@ public class NoopServiceInstanceListSupplier implements ServiceInstanceListSuppl
 
 	@Override
 	public Flux<List<ServiceInstance>> get(Request request) {
+		/**
+		 * 仅返回空集合
+		 */
 		return Flux.defer(() -> Flux.just(Collections.emptyList()));
 	}
 

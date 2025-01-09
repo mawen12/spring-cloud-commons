@@ -19,8 +19,7 @@ package org.springframework.cloud.client.serviceregistry;
 import org.springframework.core.Ordered;
 
 /**
- * Service registration life cycle. This life cycle is only related to
- * {@link Registration}.
+ * 管理实例注册的生命周期，该生命周期仅与{@link Registration}相关
  *
  * @author Zen Huifer
  */
@@ -32,29 +31,25 @@ public interface RegistrationLifecycle<R extends Registration> extends Ordered {
 	int DEFAULT_ORDER = 0;
 
 	/**
-	 * A method executed before registering the local service with the
-	 * {@link ServiceRegistry}.
+	 * 在{@link ServiceRegistry#register(Registration)}方法之前执行
 	 * @param registration registration
 	 */
 	void postProcessBeforeStartRegister(R registration);
 
 	/**
-	 * A method executed after registering the local service with the
-	 * {@link ServiceRegistry}.
+	 * 在{@link ServiceRegistry#register(Registration)}方法之后执行
 	 * @param registration registration
 	 */
 	void postProcessAfterStartRegister(R registration);
 
 	/**
-	 * A method executed before de-registering the local service with the
-	 * {@link ServiceRegistry}.
+	 * 在{@link ServiceRegistry#deregister(Registration)}方法之前执行
 	 * @param registration registration
 	 */
 	void postProcessBeforeStopRegister(R registration);
 
 	/**
-	 * A method executed after de-registering the local service with the
-	 * {@link ServiceRegistry}.
+	 * 在{@link ServiceRegistry#deregister(Registration)}方法之后执行
 	 * @param registration registration
 	 */
 	void postProcessAfterStopRegister(R registration);

@@ -24,8 +24,7 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 
 /**
- * A {@link org.springframework.cloud.client.discovery.DiscoveryClient} that will use the
- * properties file as a source of service instances.
+ * 基于{@link DiscoveryClient}的简单实现，使用{@link SimpleDiscoveryProperties}作为构造服务实例的源头
  *
  * @author Biju Kunjummen
  * @author Olga Maciaszek-Sharma

@@ -26,7 +26,7 @@ import java.lang.annotation.Target;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 /**
- * Provides a more succinct conditional <code>spring.cloud.discovery.enabled</code>.
+ * 提供一个简介的条件，PROPERTIES(spring.cloud.discovery.enabled)=true
  *
  * @since 2.0
  * @author Olga Maciaszek-Sharma

@@ -26,8 +26,14 @@ import java.lang.annotation.Target;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
- * Annotation to mark a RestTemplate, RestClient.Builder or WebClient.Builder bean to be
- * configured to use a LoadBalancerClient.
+ * 支持标记在以下类上：
+ * <ul>
+ *     <li>{@link org.springframework.web.client.RestTemplate}</li>
+ *     <li>{@link org.springframework.web.client.RestClient.Builder}</li>
+ *     <li>{@link org.springframework.web.reactive.function.client.WebClient.Builder}</li>
+ * </ul>
+ * <p>
+ * 使用该注解后，会将原先的类升级为{@link LoadBalancerClient}，即支持客户端侧的负载均衡
  *
  * @author Spencer Gibb
  */

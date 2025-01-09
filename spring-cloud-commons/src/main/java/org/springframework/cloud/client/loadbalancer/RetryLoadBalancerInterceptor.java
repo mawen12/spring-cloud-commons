@@ -38,6 +38,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.StreamUtils;
 
 /**
+ * 支持失败重试的负载均衡拦截器
+ *
  * @author Ryan Baxter
  * @author Will Tran
  * @author Gang Li
@@ -48,12 +50,24 @@ public class RetryLoadBalancerInterceptor implements BlockingLoadBalancerInterce
 
 	private static final Log LOG = LogFactory.getLog(RetryLoadBalancerInterceptor.class);
 
+	/**
+	 * 负载均衡客户端，用于获取服务实例，执行请求
+	 */
 	private final LoadBalancerClient loadBalancer;
 
+	/**
+	 * 负载均衡请求工厂，用于构造{@link LoadBalancerRequest}
+	 */
 	private final LoadBalancerRequestFactory requestFactory;
 
+	/**
+	 * 负载均衡拦截工厂，用于构造重试相关的
+	 */
 	private final LoadBalancedRetryFactory lbRetryFactory;
 
+	/**
+	 * 服务实例工厂，用于获取服务实例
+	 */
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory;
 
 	public RetryLoadBalancerInterceptor(LoadBalancerClient loadBalancer, LoadBalancerRequestFactory requestFactory,
@@ -65,12 +79,30 @@ public class RetryLoadBalancerInterceptor implements BlockingLoadBalancerInterce
 		this.loadBalancerFactory = loadBalancerFactory;
 	}
 
+	/**
+	 * 拦截请求的方法
+	 *
+	 * @param request
+	 * @param body
+	 * @param execution
+	 * @return
+	 * @throws IOException
+	 */
 	@Override
 	public ClientHttpResponse intercept(final HttpRequest request, final byte[] body,
 			final ClientHttpRequestExecution execution) throws IOException {
+		/**
+		 * 获取原始的URI
+		 */
 		final URI originalUri = request.getURI();
+		/**
+		 * 获取服务名称
+		 */
 		final String serviceName = originalUri.getHost();
 		Assert.state(serviceName != null, "Request URI does not contain a valid hostname: " + originalUri);
+		/**
+		 *
+		 */
 		final LoadBalancedRetryPolicy retryPolicy = lbRetryFactory.createRetryPolicy(serviceName, loadBalancer);
 		RetryTemplate template = createRetryTemplate(serviceName, request, retryPolicy);
 		return template.execute(context -> {

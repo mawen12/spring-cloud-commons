@@ -24,14 +24,17 @@ import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalanc
 import org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalancerClient;
 
 /**
- * An implementation of {@link LoadBalancedRetryFactory} for
- * {@link BlockingLoadBalancerClient}.
+ * 基于{@link LoadBalancedRetryFactory}同步实现。
+ * 主要配合{@link BlockingLoadBalancerClient}使用。
  *
  * @author Olga Maciaszek-Sharma
  * @since 2.2.6
  */
 public class BlockingLoadBalancedRetryFactory implements LoadBalancedRetryFactory {
 
+	/**
+	 *
+	 */
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory;
 
 	public BlockingLoadBalancedRetryFactory(ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory) {

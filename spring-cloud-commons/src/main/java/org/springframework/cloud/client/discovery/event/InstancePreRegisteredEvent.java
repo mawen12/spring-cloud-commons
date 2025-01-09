@@ -16,16 +16,21 @@
 
 package org.springframework.cloud.client.discovery.event;
 
+import org.springframework.cloud.client.serviceregistry.AbstractAutoServiceRegistration;
 import org.springframework.cloud.client.serviceregistry.Registration;
 import org.springframework.context.ApplicationEvent;
 
 /**
- * An event to fire before a service is registered.
+ * 实例预注册事件，在实例注册之前发出该事件
  *
+ * @see AbstractAutoServiceRegistration#start()
  * @author Ryan Baxter
  */
 public class InstancePreRegisteredEvent extends ApplicationEvent {
 
+	/**
+	 * 待注册的实例信息
+	 */
 	private Registration registration;
 
 	/**

@@ -26,7 +26,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 /**
- * Auto-configuration for composite discovery client.
+ * 用于复合的服务发现客户端的自动配置
+ * <p>
+ * 其执行顺序为：{@link SimpleDiscoveryClientAutoConfiguration} -> This
+ * 这是因为复合的客户端中之一有可能是{@link org.springframework.cloud.client.discovery.simple.SimpleDiscoveryClient}
  *
  * @author Biju Kunjummen
  */

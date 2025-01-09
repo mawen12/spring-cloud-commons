@@ -22,8 +22,7 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.core.Ordered;
 
 /**
- * Represents read operations commonly available to discovery services such as Netflix
- * Eureka or consul.io.
+ * 用于服务发现，即从服务管理组件读取服务的操作
  *
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
@@ -37,27 +36,28 @@ public interface DiscoveryClient extends Ordered {
 	int DEFAULT_ORDER = 0;
 
 	/**
-	 * A human-readable description of the implementation, used in HealthIndicator.
+	 * 人类可读描述实现
 	 * @return The description.
 	 */
 	String description();
 
 	/**
-	 * Gets all ServiceInstances associated with a particular serviceId.
+	 * 返回特定服务ID的所有服务实例
 	 * @param serviceId The serviceId to query.
 	 * @return A List of ServiceInstance.
 	 */
 	List<ServiceInstance> getInstances(String serviceId);
 
 	/**
+	 * 返回所有的服务ID
 	 * @return All known service IDs.
 	 */
 	List<String> getServices();
 
 	/**
-	 * Can be used to verify the client is valid and able to make calls.
+	 * 用于验证客户端是否合法，是否能够发起调用
 	 * <p>
-	 * A successful invocation with no exception thrown implies the client is able to make
+	 * 验证的方式就是获取所有的服务ID，并且没有报错
 	 * calls.
 	 * <p>
 	 * The default implementation simply calls {@link #getServices()} - client

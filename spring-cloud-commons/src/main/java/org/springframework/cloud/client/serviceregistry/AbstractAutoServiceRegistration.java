@@ -37,10 +37,9 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.core.env.Environment;
 
 /**
- * Lifecycle methods that may be useful and common to {@link ServiceRegistry}
- * implementations.
- *
- * TODO: Document the lifecycle.
+ * 自动服务注册的总入口，该类负责服务注册、服务注销
+ * <p>
+ * 其实现了{@link ApplicationListener<WebServerInitializedEvent>}，用于监听实例启动，并获取实例的端口
  *
  * @param <R> Registration type passed to the {@link ServiceRegistry}.
  * @author Spencer Gibb
@@ -51,24 +50,48 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 
 	private static final Log logger = LogFactory.getLog(AbstractAutoServiceRegistration.class);
 
+	/**
+	 * 提供服务实例注册注销、状态查询更新的功能
+	 */
 	private final ServiceRegistry<R> serviceRegistry;
 
+	/**
+	 * 默认自启动
+	 */
 	private final boolean autoStartup = true;
 
+	/**
+	 * 是否运行的状态标识，默认false
+	 */
 	private final AtomicBoolean running = new AtomicBoolean(false);
 
 	private final int order = 0;
 
+	/**
+	 * 实例端口
+	 */
 	private final AtomicInteger port = new AtomicInteger(0);
 
+	/**
+	 * Spring的应用上下文
+	 */
 	private ApplicationContext context;
 
+	/**
+	 * Spring的环境
+	 */
 	private Environment environment;
 
+	/**
+	 * 自动服务注册属性，影响自动服务注册的行为
+	 */
 	private AutoServiceRegistrationProperties properties;
 
 	private List<RegistrationManagementLifecycle<R>> registrationManagementLifecycles = new ArrayList<>();
 
+	/**
+	 * 管理实例注册的生命周期
+	 */
 	private List<RegistrationLifecycle<R>> registrationLifecycles = new ArrayList<>();
 
 	protected AbstractAutoServiceRegistration(ServiceRegistry<R> serviceRegistry,
@@ -115,7 +138,13 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 				return;
 			}
 		}
+		/**
+		 * 获取服务的端口
+		 */
 		this.port.compareAndSet(0, event.getWebServer().getPort());
+		/**
+		 * 启动自动服务注册
+		 */
 		this.start();
 	}
 
@@ -139,7 +168,13 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 		return this.autoStartup;
 	}
 
+	/**
+	 * 执行自动服务注册
+	 */
 	public void start() {
+		/**
+		 * 如果未开启了服务注侧，则直接退出
+		 */
 		if (!isEnabled()) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Discovery Lifecycle disabled. Not starting");
@@ -149,24 +184,49 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 
 		// only initialize if nonSecurePort is greater than 0 and it isn't already running
 		// because of containerPortInitializer below
+		/**
+		 * 如果尚未启动，则直接，否则不再重新启动
+		 */
 		if (!this.running.get()) {
+			/**
+			 * 发布实例预注册事件，事件中携带要注册的实例信息
+			 */
 			this.context.publishEvent(new InstancePreRegisteredEvent(this, getRegistration()));
-			registrationLifecycles.forEach(
-					registrationLifecycle -> registrationLifecycle.postProcessBeforeStartRegister(getRegistration()));
+			/**
+			 * 触发实例注册前的生命周期函数，回调{@link RegistrationLifecycle#postProcessBeforeStartRegister(Registration)}
+			 */
+			registrationLifecycles.forEach(registrationLifecycle -> registrationLifecycle.postProcessBeforeStartRegister(getRegistration()));
+			/**
+			 * 执行服务注册
+			 */
 			register();
-			this.registrationLifecycles.forEach(
-					registrationLifecycle -> registrationLifecycle.postProcessAfterStartRegister(getRegistration()));
-			if (shouldRegisterManagement()) {
-				this.registrationManagementLifecycles
-					.forEach(registrationManagementLifecycle -> registrationManagementLifecycle
-						.postProcessBeforeStartRegisterManagement(getManagementRegistration()));
-				this.registerManagement();
-				registrationManagementLifecycles
-					.forEach(registrationManagementLifecycle -> registrationManagementLifecycle
-						.postProcessAfterStartRegisterManagement(getManagementRegistration()));
+			/**
+			 * 触发实例注册后的生命周期函数，回调{@link RegistrationLifecycle#postProcessAfterStartRegister(Registration)}
+			 */
+			this.registrationLifecycles.forEach(registrationLifecycle -> registrationLifecycle.postProcessAfterStartRegister(getRegistration()));
 
+			if (shouldRegisterManagement()) {
+				/**
+				 * 触发管理注册后的生命周期函数，回调{@link RegistrationManagementLifecycle#postProcessBeforeStartRegisterManagement(Registration)}
+				 */
+				this.registrationManagementLifecycles.forEach(registrationManagementLifecycle -> registrationManagementLifecycle.postProcessBeforeStartRegisterManagement(getManagementRegistration()));
+				/**
+				 * 执行管理注册
+				 */
+				this.registerManagement();
+				/**
+				 * 触发管理注册的生命周期函数，回调{@link RegistrationManagementLifecycle#postProcessAfterStartRegisterManagement(Registration)}
+				 */
+				registrationManagementLifecycles.forEach(registrationManagementLifecycle -> registrationManagementLifecycle.postProcessAfterStartRegisterManagement(getManagementRegistration()));
 			}
+			/**
+			 * 发布实例注册完成事件，事件中携带了服务注册的配置信息
+			 * Nacos的解决方案是返回NacosDiscoveryProperties
+			 */
 			this.context.publishEvent(new InstanceRegisteredEvent<>(this, getConfiguration()));
+			/**
+			 * 更新运行状态
+			 */
 			this.running.compareAndSet(false, true);
 		}
 
@@ -190,7 +250,9 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 	protected abstract Object getConfiguration();
 
 	/**
-	 * @return True, if this is enabled.
+	 * Nacos中使用PROPERTIES(spring.cloud.nacos.discovery.enabled)=true表示开启，默认为true
+	 *
+	 * @return 是否开启服务注册
 	 */
 	protected abstract boolean isEnabled();
 
@@ -261,6 +323,9 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 	 * Register the local service with the {@link ServiceRegistry}.
 	 */
 	protected void register() {
+		/**
+		 * 使用{@link ServiceRegistry}执行实例注册
+		 */
 		this.serviceRegistry.register(getRegistration());
 	}
 
@@ -268,8 +333,14 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 	 * Register the local management service with the {@link ServiceRegistry}.
 	 */
 	protected void registerManagement() {
+		/**
+		 * 获取管理相关实例
+		 */
 		R registration = getManagementRegistration();
 		if (registration != null) {
+			/**
+			 * 注册实例
+			 */
 			this.serviceRegistry.register(registration);
 		}
 	}
@@ -278,6 +349,9 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 	 * De-register the local service with the {@link ServiceRegistry}.
 	 */
 	protected void deregister() {
+		/**
+		 * 使用{@link ServiceRegistry}注销实例
+		 */
 		this.serviceRegistry.deregister(getRegistration());
 	}
 
@@ -285,29 +359,52 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 	 * De-register the local management service with the {@link ServiceRegistry}.
 	 */
 	protected void deregisterManagement() {
+		/**
+		 * 获取管理相关的实例
+		 */
 		R registration = getManagementRegistration();
 		if (registration != null) {
+			/**
+			 * 使用{@link ServiceRegistry}注销管理实例
+			 */
 			this.serviceRegistry.deregister(registration);
 		}
 	}
 
 	public void stop() {
+		/**
+		 * 更新运行状态
+		 */
 		if (this.getRunning().compareAndSet(true, false) && isEnabled()) {
-
-			this.registrationLifecycles.forEach(
-					registrationLifecycle -> registrationLifecycle.postProcessBeforeStopRegister(getRegistration()));
+			/**
+			 * 触发实例注销前的生命周期函数，回调{@link RegistrationLifecycle#postProcessBeforeStopRegister(Registration)}
+			 */
+			this.registrationLifecycles.forEach(registrationLifecycle -> registrationLifecycle.postProcessBeforeStopRegister(getRegistration()));
+			/**
+			 * 执行服务注销
+			 */
 			deregister();
-			this.registrationLifecycles.forEach(
-					registrationLifecycle -> registrationLifecycle.postProcessAfterStopRegister(getRegistration()));
+			/**
+			 * 触发实例注册后的生命周期函数，回调{@link RegistrationLifecycle#postProcessAfterStopRegister(Registration)}
+			 */
+			this.registrationLifecycles.forEach(registrationLifecycle -> registrationLifecycle.postProcessAfterStopRegister(getRegistration()));
 			if (shouldRegisterManagement()) {
-				this.registrationManagementLifecycles
-					.forEach(registrationManagementLifecycle -> registrationManagementLifecycle
-						.postProcessBeforeStopRegisterManagement(getManagementRegistration()));
+				/**
+				 * 触发管理注销前的生命周期函数，回调{@link RegistrationManagementLifecycle#postProcessBeforeStopRegisterManagement(Registration)}
+				 */
+				this.registrationManagementLifecycles.forEach(registrationManagementLifecycle -> registrationManagementLifecycle.postProcessBeforeStopRegisterManagement(getManagementRegistration()));
+				/**
+				 * 执行管理注销
+				 */
 				deregisterManagement();
-				this.registrationManagementLifecycles
-					.forEach(registrationManagementLifecycle -> registrationManagementLifecycle
-						.postProcessAfterStopRegisterManagement(getManagementRegistration()));
+				/**
+				 * 触发管理注销后的生命周期函数，回调{@link RegistrationManagementLifecycle#postProcessAfterStopRegisterManagement(Registration)}
+				 */
+				this.registrationManagementLifecycles.forEach(registrationManagementLifecycle -> registrationManagementLifecycle.postProcessAfterStopRegisterManagement(getManagementRegistration()));
 			}
+			/**
+			 * 停止服务注册
+			 */
 			this.serviceRegistry.close();
 		}
 	}

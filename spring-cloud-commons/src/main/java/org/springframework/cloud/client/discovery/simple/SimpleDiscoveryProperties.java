@@ -27,11 +27,12 @@ import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 
 /**
- * Properties to hold the details of a
- * {@link org.springframework.cloud.client.discovery.DiscoveryClient} service instances
- * for a given service. It also holds the user-configurable order that will be used to
- * establish the precedence of this client in the list of clients used by
- * {@link org.springframework.cloud.client.discovery.composite.CompositeDiscoveryClient}.
+ * Spring Cloud简单服务发现属性，用于构造服务实例，其读取 PROPERTIES(spring.cloud.discovery.client.simple)
+ * <p>
+ * 其中包含用户可配置的顺序，该顺序将用于在{@link org.springframework.cloud.client.discovery.composite.CompositeDiscoveryClient}
+ * 使用的客户端列表中确定此客户端的优先级，或者成为权重。
+ * <p>
+ * 该类继承了{@link InitializingBean}其会在初始化完之后回调
  *
  * @author Biju Kunjummen
  * @author Olga Maciaszek-Sharma
@@ -42,6 +43,9 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
 @ConfigurationProperties(prefix = "spring.cloud.discovery.client.simple")
 public class SimpleDiscoveryProperties implements InitializingBean {
 
+	/**
+	 * Map<服务Id, 该服务下的所有实例>
+	 */
 	private Map<String, List<DefaultServiceInstance>> instances = new HashMap<>();
 
 	/**
@@ -52,6 +56,9 @@ public class SimpleDiscoveryProperties implements InitializingBean {
 	@NestedConfigurationProperty
 	private DefaultServiceInstance local = new DefaultServiceInstance(null, null, null, 0, false);
 
+	/**
+	 * 顺序，也可是为优先级
+	 */
 	private int order = DiscoveryClient.DEFAULT_ORDER;
 
 	public Map<String, List<DefaultServiceInstance>> getInstances() {
@@ -77,6 +84,9 @@ public class SimpleDiscoveryProperties implements InitializingBean {
 	@Override
 	public void afterPropertiesSet() {
 		for (String key : this.instances.keySet()) {
+			/**
+			 * 将key作为实例的服务ID
+			 */
 			for (DefaultServiceInstance instance : this.instances.get(key)) {
 				instance.setServiceId(key);
 			}

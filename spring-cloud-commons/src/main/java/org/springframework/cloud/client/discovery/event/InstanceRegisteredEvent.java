@@ -19,8 +19,7 @@ package org.springframework.cloud.client.discovery.event;
 import org.springframework.context.ApplicationEvent;
 
 /**
- * Event to be published after the local service instance registers itself with a
- * discovery service.
+ * 实例完成注册事件，在事件注册成功后发出该事件
  *
  * @param <T> - type of configuration
  * @author Spencer Gibb
@@ -28,6 +27,10 @@ import org.springframework.context.ApplicationEvent;
 @SuppressWarnings("serial")
 public class InstanceRegisteredEvent<T> extends ApplicationEvent {
 
+	/**
+	 * 实例的配置信息，
+	 * Nacos中对应的是{@link NacosDiscoveryProperties}
+	 */
 	private T config;
 
 	/**

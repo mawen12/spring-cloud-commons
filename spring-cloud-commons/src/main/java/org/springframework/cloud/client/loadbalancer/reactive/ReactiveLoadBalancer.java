@@ -27,7 +27,7 @@ import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.Response;
 
 /**
- * Reactive load balancer.
+ * 反应式负载均衡器
  *
  * @param <T> type of the response
  * @author Spencer Gibb
@@ -41,7 +41,8 @@ public interface ReactiveLoadBalancer<T> {
 	Request<DefaultRequestContext> REQUEST = new DefaultRequest<>();
 
 	/**
-	 * Choose the next server based on the load balancing algorithm.
+	 * 返回基于负载均衡算法的下一个服务器
+	 *
 	 * @param request - incoming request
 	 * @return publisher for the response
 	 */
@@ -52,16 +53,32 @@ public interface ReactiveLoadBalancer<T> {
 		return choose(REQUEST);
 	}
 
+	/**
+	 * 负载均衡工厂
+	 * @param <T>
+	 */
 	interface Factory<T> {
 
+		/**
+		 * 返回特定服务ID的负载均衡属性
+		 *
+		 * @param serviceId
+		 * @return
+		 */
 		default LoadBalancerProperties getProperties(String serviceId) {
 			return null;
 		}
 
+		/**
+		 * 返回特定服务的复杂均衡实例
+		 * @param serviceId
+		 * @return
+		 */
 		ReactiveLoadBalancer<T> getInstance(String serviceId);
 
 		/**
-		 * Allows accessing beans registered within client-specific LoadBalancer contexts.
+		 * 返回在客户端特定的LoadBalancer上下文中注册的bean
+		 *
 		 * @param name Name of the beans to be returned
 		 * @param type The class of the beans to be returned
 		 * @param <X> The type of the beans to be returned
@@ -71,8 +88,8 @@ public interface ReactiveLoadBalancer<T> {
 		<X> Map<String, X> getInstances(String name, Class<X> type);
 
 		/**
-		 * Allows accessing a bean registered within client-specific LoadBalancer
-		 * contexts.
+		 * 返回在客户端特定的LoadBalancer上下文中注册的bean
+		 *
 		 * @param name Name of the bean to be returned
 		 * @param clazz The class of the bean to be returned
 		 * @param generics The classes of generic types of the bean to be returned

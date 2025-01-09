@@ -26,8 +26,7 @@ import java.lang.annotation.Target;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 /**
- * Provides a more succinct conditional
- * <code>spring.cloud.discovery.blocking.enabled</code>.
+ * 提供 PROPERTIES(spring.cloud.discovery.blocking.enabled)=true
  *
  * @author Tim Ysewyn
  * @since 2.2.0

@@ -19,8 +19,7 @@ package org.springframework.cloud.loadbalancer.core;
 import org.springframework.cloud.client.ServiceInstance;
 
 /**
- * A marker interface for {@link ReactorLoadBalancer} that allows selecting
- * {@link ServiceInstance} objects.
+ * 作用于{@link ServiceInstance}的反应式负载均衡器的标记接口，可以选择服务实例
  *
  * @author Olga Maciaszek-Sharma
  * @since 2.2.0

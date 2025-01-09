@@ -32,7 +32,7 @@ import org.springframework.cloud.client.loadbalancer.Response;
 import org.springframework.util.function.SingletonSupplier;
 
 /**
- * A random-based implementation of {@link ReactorServiceInstanceLoadBalancer}.
+ * 基于{@link ReactorServiceInstanceLoadBalancer}的随机选择实现
  *
  * @author Olga Maciaszek-Sharma
  * @author Nan Chiu
@@ -42,8 +42,14 @@ public class RandomLoadBalancer implements ReactorServiceInstanceLoadBalancer {
 
 	private static final Log log = LogFactory.getLog(RandomLoadBalancer.class);
 
+	/**
+	 * 服务名称
+	 */
 	private final String serviceId;
 
+	/**
+	 * 提供获取服务实例列表的单例提供其
+	 */
 	private final SingletonSupplier<ServiceInstanceListSupplier> serviceInstanceListSingletonSupplier;
 
 	/**
@@ -61,7 +67,11 @@ public class RandomLoadBalancer implements ReactorServiceInstanceLoadBalancer {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public Mono<Response<ServiceInstance>> choose(Request request) {
+		/**
+		 * 获取服务实例列表
+		 */
 		ServiceInstanceListSupplier supplier = serviceInstanceListSingletonSupplier.obtain();
+
 		return supplier.get(request)
 			.next()
 			.map(serviceInstances -> processInstanceResponse(supplier, serviceInstances));

@@ -41,7 +41,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * {@link EnableAutoConfiguration Auto-configuration} for Spring Cloud Commons Client.
+ * Spring Cloud Commons 客户端的自动配置类
  *
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
@@ -51,6 +51,15 @@ import org.springframework.context.annotation.Configuration;
 @Configuration(proxyBeanMethods = false)
 public class CommonsClientAutoConfiguration {
 
+	/**
+	 * 服务发现负载均衡配置，开启的条件如下：
+	 * <ul>
+	 *     <li>CLASS(HealthIndicator)</li>
+	 *     <li>BEAN(DiscoveryClient)</li>
+	 *     <li>PROPERTIES(spring.cloud.discovery.enabled)=true -> DEFAULT(true)</li>
+	 *     <li>PROPERTIES(spring.cloud.discovery.blocking.enabled)=true -> DEFAULT(true)</li>
+	 * </ul>
+	 */
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass(HealthIndicator.class)
 	@EnableConfigurationProperties(DiscoveryClientHealthIndicatorProperties.class)

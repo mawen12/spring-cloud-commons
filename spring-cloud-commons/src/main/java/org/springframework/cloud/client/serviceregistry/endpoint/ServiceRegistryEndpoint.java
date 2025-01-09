@@ -26,7 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 
 /**
- * Endpoint to display and set the service instance status using the ServiceRegistry.
+ * 使用{@link ServiceRegistry}显示和设置服务实例状态的端点
  *
  * @author Spencer Gibb
  */
@@ -34,8 +34,14 @@ import org.springframework.util.Assert;
 @Endpoint(id = "serviceregistry")
 public class ServiceRegistryEndpoint {
 
+	/**
+	 * 提供服务实例注册注销、状态查询更新的功能
+	 */
 	private final ServiceRegistry serviceRegistry;
 
+	/**
+	 * {@link ServiceRegistry}操作对象，保存了和实例相关的信息
+	 */
 	private Registration registration;
 
 	public ServiceRegistryEndpoint(ServiceRegistry<?> serviceRegistry) {
@@ -54,6 +60,9 @@ public class ServiceRegistryEndpoint {
 			return new WebEndpointResponse<>("no registration found", HttpStatus.NOT_FOUND.value());
 		}
 
+		/**
+		 * 更新实例状态，状态值：UP | DOWN
+		 */
 		this.serviceRegistry.setStatus(this.registration, status);
 		return new WebEndpointResponse<>();
 	}
@@ -64,6 +73,9 @@ public class ServiceRegistryEndpoint {
 			return new WebEndpointResponse<>("no registration found", HttpStatus.NOT_FOUND.value());
 		}
 
+		/**
+		 * 获取实例状态，状态值：UP | DOWN
+		 */
 		return new WebEndpointResponse<>(this.serviceRegistry.getStatus(this.registration));
 	}
 

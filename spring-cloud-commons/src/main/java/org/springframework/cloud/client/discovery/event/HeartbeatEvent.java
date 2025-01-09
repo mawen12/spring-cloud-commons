@@ -19,9 +19,8 @@ package org.springframework.cloud.client.discovery.event;
 import org.springframework.context.ApplicationEvent;
 
 /**
- * An event that a DiscoveryClient implementation can broadcast if it supports heartbeats
- * from the discovery server. Provides listeners with a basic indication of a state change
- * in the service catalog.
+ * 服务发现客户端和服务发现服务端之间的心跳事件。
+ * 这是一个广播事件，其中携带了状态。
  *
  * @author Spencer Gibb
  * @author Dave Syer
@@ -29,6 +28,9 @@ import org.springframework.context.ApplicationEvent;
 @SuppressWarnings("serial")
 public class HeartbeatEvent extends ApplicationEvent {
 
+	/**
+	 * 实例状态
+	 */
 	private final Object state;
 
 	/**

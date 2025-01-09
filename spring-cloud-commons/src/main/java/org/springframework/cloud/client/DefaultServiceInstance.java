@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * Default implementation of {@link ServiceInstance}.
+ * {@link ServiceInstance}的默认实现
  *
  * @author Spencer Gibb
  * @author Tim Ysewyn
@@ -31,16 +31,34 @@ import java.util.Objects;
  */
 public class DefaultServiceInstance implements ServiceInstance {
 
+	/**
+	 * 实例id，每个实例都是唯一的
+	 */
 	private String instanceId;
 
+	/**
+	 * 服务id
+	 */
 	private String serviceId;
 
+	/**
+	 * 实例的主机名
+	 */
 	private String host;
 
+	/**
+	 * 实例的端口
+	 */
 	private int port;
 
+	/**
+	 * 实例是否使用HTTP
+	 */
 	private boolean secure;
 
+	/**
+	 * 实例的元信息
+	 */
 	private Map<String, String> metadata = new LinkedHashMap<>();
 
 	private URI uri;

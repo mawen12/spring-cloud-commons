@@ -36,11 +36,9 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * The base configuration bean for Spring Cloud LoadBalancer.
+ * 用于Spring Cloud负载均衡器的基本配置，即通用配置
  *
- * See {@link LoadBalancerClientsProperties} for the {@link ConfigurationProperties}
- * annotation.
- *
+ * @see LoadBalancerClientsProperties
  * @author Olga Maciaszek-Sharma
  * @author Gandhimathi Velusamy
  * @author Zhuozhi Ji
@@ -49,30 +47,27 @@ import org.springframework.web.client.RestTemplate;
 public class LoadBalancerProperties {
 
 	/**
-	 * Properties for <code>HealthCheckServiceInstanceListSupplier</code>.
+	 * 健康检查属性，包含健康检查的调用行为、配置信息等
 	 */
 	private HealthCheck healthCheck = new HealthCheck();
 
 	/**
-	 * Allows setting the value of <code>hint</code> that is passed on to the LoadBalancer
-	 * request and can subsequently be used in {@link ReactiveLoadBalancer}
-	 * implementations.
+	 * 影响负载均衡亲的请求以及随后被用于{@link ReactiveLoadBalancer}的实现
 	 */
 	private Map<String, String> hint = new LinkedCaseInsensitiveMap<>();
 
 	/**
-	 * Allows setting the name of the header used for passing the hint for hint-based
-	 * service instance filtering.
+	 * hint的请求头名称，用于在过滤时，传递hit给基于hit的实例
 	 */
 	private String hintHeaderName = "X-SC-LB-Hint";
 
 	/**
-	 * Properties for Spring-Retry and Reactor Retry support in Spring Cloud LoadBalancer.
+	 * 用于设置Spring Cloud中负载均衡器下Spring-Retry和Reactor Retry的行为
 	 */
 	private Retry retry = new Retry();
 
 	/**
-	 * Properties for LoadBalancer sticky-session.
+	 * 用于配置粘连会话的负载均衡器实现
 	 */
 	private StickySession stickySession = new StickySession();
 
@@ -96,12 +91,12 @@ public class LoadBalancerProperties {
 	private Subset subset = new Subset();
 
 	/**
-	 * Enabling X-Forwarded Host and Proto Headers.
+	 * X-Forwarded主机和协议头信息
 	 */
 	private XForwarded xForwarded = new XForwarded();
 
 	/**
-	 * Properties for LoadBalancer metrics.
+	 * 负载均衡指标相关属性
 	 */
 	private Stats stats = new Stats();
 
@@ -178,16 +173,18 @@ public class LoadBalancerProperties {
 		this.stats = stats;
 	}
 
+	/**
+	 * 粘连会话，主要用于设置会话是否传递
+	 */
 	public static class StickySession {
 
 		/**
-		 * The name of the cookie holding the preferred instance id.
+		 * Cookie中保存首选实例ID的名称
 		 */
 		private String instanceIdCookieName = "sc-lb-instance-id";
 
 		/**
-		 * Indicates whether a cookie with the newly selected instance should be added by
-		 * SC LoadBalancer.
+		 * 指示Spring Cloud负载均衡器是否应添加带有新选定实例的cookie
 		 */
 		private boolean addServiceInstanceCookie = false;
 
@@ -209,10 +206,14 @@ public class LoadBalancerProperties {
 
 	}
 
+	/**
+	 * XForwarded开关，如果打开了，则会在{@link org.springframework.cloud.loadbalancer.blocking.XForwardedHeadersTransformer}
+	 * 中设置{@code X-Forwarded-Host}和{@code X-Forwarded-Proto}请求头
+	 */
 	public static class XForwarded {
 
 		/**
-		 * To Enable X-Forwarded Headers.
+		 * 是否启用X-Forwarded头
 		 */
 		private boolean enabled = false;
 
@@ -226,56 +227,52 @@ public class LoadBalancerProperties {
 
 	}
 
+	/**
+	 * 健康检查，设置健康检查的执行间隔、执行目标等
+	 */
 	public static class HealthCheck {
 
 		/**
-		 * Initial delay value for the HealthCheck scheduler.
+		 * 健康检查调度的初始延迟，默认为不延迟
 		 */
 		private Duration initialDelay = Duration.ZERO;
 
 		/**
-		 * Interval for rerunning the HealthCheck scheduler.
+		 * 健康检查调度的执行执行间隔，默认为25s
 		 */
 		private Duration interval = Duration.ofSeconds(25);
 
 		/**
-		 * Interval for refetching available service instances.
+		 * 重新拉取可用的服务实例的执行间隔，默认25s
 		 */
 		private Duration refetchInstancesInterval = Duration.ofSeconds(25);
 
 		/**
-		 * Path at which the health-check request should be made. Can be set up per
-		 * <code>serviceId</code>. A <code>default</code> value can be set up as well. If
-		 * none is set up, <code>/actuator/health</code> will be used.
+		 * 健康检查请求的目标路径，可根据服务Id设置，也可使用默认值，如果没有设置，则采用DEFAULT(/actuator/health)
 		 */
 		private Map<String, String> path = new LinkedCaseInsensitiveMap<>();
 
 		/**
-		 * Port at which the health-check request should be made. If none is set, the port
-		 * under which the requested service is available at the service instance.
+		 * 健康检查请求的端口，默认为服务实例上所请求服务可用的端口
 		 */
 		private Integer port;
 
 		/**
-		 * Indicates whether the instances should be refetched by the
-		 * <code>HealthCheckServiceInstanceListSupplier</code>. This can be used if the
-		 * instances can be updated and the underlying delegate does not provide an
-		 * ongoing flux.
+		 * 指示{@code HealthCheckServiceInstanceListSupplier}是否应该重新拉取实例。默认为false
+		 * 如果实例信息可以更新，并且底层委托不提供持续的变化，则可以使用此方法。
 		 */
 		private boolean refetchInstances = false;
 
 		/**
-		 * Indicates whether health checks should keep repeating. It might be useful to
-		 * set it to <code>false</code> if periodically refetching the instances, as every
-		 * refetch will also trigger a healthcheck.
+		 * 指示健康见擦汗是否应不断重复。如果有其他地方定期获取实例，则将其设置为false可能会很有用。
+		 * 因为每次重新获取也会触发健康检查。默认为true。
+		 * 像是Nacos就提供了服务端更新时，推送到客户端的功能，这就代表可以将该值设置为false。
 		 */
 		private boolean repeatHealthCheck = true;
 
 		/**
-		 * Indicates whether the {@code healthCheckFlux} should emit on each alive
-		 * {@link ServiceInstance} that has been retrieved. If set to {@code false}, the
-		 * entire alive instances sequence is first collected into a list and only then
-		 * emitted.
+		 * 指示是否应该在已检索到的每个活动的{@link ServiceInstance}上发出{@code healthCheckFlux}。
+		 * 如果设置为false，则首先将整个活动实例序列收集到列表中，然后才发出。默认为true
 		 */
 		private boolean updateResultsList = true;
 
@@ -345,47 +342,57 @@ public class LoadBalancerProperties {
 
 	}
 
+	/**
+	 * 错误重试相关的配置
+	 */
 	public static class Retry {
 
+		/**
+		 * 是否开启重试，默认为true
+		 */
 		private boolean enabled = true;
 
 		/**
-		 * Indicates retries should be attempted on operations other than
-		 * {@link HttpMethod#GET}.
+		 * 指示是否对所有类型的操作进行重试，而非仅限于GET请求，默认仅对GET请求重试
 		 */
 		private boolean retryOnAllOperations = false;
 
 		/**
-		 * Indicates retries should be attempted for all exceptions, not only those
-		 * specified in {@code retryableExceptions}.
+		 * 指示是否对所有异常进行重试，而非仅限于{@code RetryableException}
 		 */
 		private boolean retryOnAllExceptions = false;
 
 		/**
-		 * Number of retries to be executed on the same <code>ServiceInstance</code>.
+		 * 在同一个服务实例上执行重试的最大次数，默认为0，代表该服务执行失败后，便会切换下一个服务进行重试
 		 */
 		private int maxRetriesOnSameServiceInstance = 0;
 
 		/**
-		 * Number of retries to be executed on the next <code>ServiceInstance</code>. A
-		 * <code>ServiceInstance</code> is chosen before each retry call.
+		 * 在下一个服务实例上执行重试的最大次数，默认为1，代表该服务执行失败后，切换到下一个服务执行1次重试
 		 */
 		private int maxRetriesOnNextServiceInstance = 1;
 
 		/**
-		 * A {@link Set} of status codes that should trigger a retry.
+		 * 触发重试的状态值集合，这是预留给开发者自定义的场景，需要在服务端
 		 */
 		private Set<Integer> retryableStatusCodes = new HashSet<>();
 
 		/**
-		 * A {@link Set} of {@link Throwable} classes that should trigger a retry.
+		 * 触发重试的异常集合，默认出现以下异常时重试：
+		 * <ul>
+		 *     <li>{@link IOException}</li>
+		 *     <li>{@link TimeoutException}</li>
+		 *     <li>{@link RetryableStatusCodeException}</li>
+		 *     <li>{@link org.springframework.cloud.client.loadbalancer.reactive.RetryableStatusCodeException}</li>
+		 * </ul>
 		 */
 		private Set<Class<? extends Throwable>> retryableExceptions = new HashSet<>(
 				Arrays.asList(IOException.class, TimeoutException.class, RetryableStatusCodeException.class,
 						org.springframework.cloud.client.loadbalancer.reactive.RetryableStatusCodeException.class));
 
 		/**
-		 * Properties for Reactor Retry backoffs in Spring Cloud LoadBalancer.
+		 *
+		 * 指定重试达到上限时，触发的回退策略
 		 */
 		private Backoff backoff = new Backoff();
 
@@ -464,24 +471,30 @@ public class LoadBalancerProperties {
 			this.retryOnAllExceptions = retryOnAllExceptions;
 		}
 
+		/**
+		 * 回退策略，当重试达到上限时，便会触发回退
+		 */
 		public static class Backoff {
 
 			/**
-			 * Indicates whether Reactor Retry backoffs should be applied.
+			 * 是否启用回退策略，默认为false，代表不启用
 			 */
 			private boolean enabled = false;
 
 			/**
-			 * Used to set {@link RetryBackoffSpec#minBackoff}.
+			 * 最小的回退间隔，默认为5ms，
+			 * 被用于设置到{@link RetryBackoffSpec#minBackoff}
 			 */
 			private Duration minBackoff = Duration.ofMillis(5);
 
 			/**
-			 * Used to set {@link RetryBackoffSpec#maxBackoff}.
+			 * 最大的回退间隔，默认为最大值，
+			 * 被用于设置到{@link RetryBackoffSpec#maxBackoff}
 			 */
 			private Duration maxBackoff = Duration.ofMillis(Long.MAX_VALUE);
 
 			/**
+			 *
 			 * Used to set {@link RetryBackoffSpec#jitter}.
 			 */
 			private double jitter = 0.5d;

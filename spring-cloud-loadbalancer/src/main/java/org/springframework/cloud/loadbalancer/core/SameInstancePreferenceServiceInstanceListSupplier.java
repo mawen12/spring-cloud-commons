@@ -28,8 +28,7 @@ import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 
 /**
- * An implementation of {@link ServiceInstanceListSupplier} that selects the previously
- * chosen instance if it's available.
+ * 基于相同服务实例优先的{@link ServiceInstanceListSupplier}，即记录上一次选择的服务，如果还是可以使用的话，则继续使用
  *
  * @author Olga Maciaszek-Sharma
  * @author Jürgen Kreitler
@@ -40,6 +39,9 @@ public class SameInstancePreferenceServiceInstanceListSupplier extends Delegatin
 
 	private static final Log LOG = LogFactory.getLog(SameInstancePreferenceServiceInstanceListSupplier.class);
 
+	/**
+	 * 由负载均衡器上一次选择的服务
+	 */
 	private ServiceInstance previouslyReturnedInstance;
 
 	private boolean callGetWithRequestOnDelegates;
@@ -51,8 +53,7 @@ public class SameInstancePreferenceServiceInstanceListSupplier extends Delegatin
 	public SameInstancePreferenceServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory) {
 		super(delegate);
-		callGetWithRequestOnDelegates = loadBalancerClientFactory.getProperties(getServiceId())
-			.isCallGetWithRequestOnDelegates();
+		callGetWithRequestOnDelegates = loadBalancerClientFactory.getProperties(getServiceId()).isCallGetWithRequestOnDelegates();
 	}
 
 	@Override
@@ -76,16 +77,21 @@ public class SameInstancePreferenceServiceInstanceListSupplier extends Delegatin
 	private List<ServiceInstance> filteredBySameInstancePreference(List<ServiceInstance> serviceInstances) {
 		if (previouslyReturnedInstance != null && serviceInstances.contains(previouslyReturnedInstance)) {
 			if (LOG.isDebugEnabled()) {
-				LOG.debug(String.format("Returning previously selected service instance: %s",
-						previouslyReturnedInstance));
+				// TODO by mawen 也许可以去掉，String format
+				LOG.debug(String.format("Returning previously selected service instance: %s", previouslyReturnedInstance));
 			}
+			/**
+			 * 如果上次选择过服务，并且本次待选的服务实例列表中包含之前的，则直接使用之前的服务实例
+			 */
 			return Collections.singletonList(previouslyReturnedInstance);
 		}
 		if (LOG.isDebugEnabled()) {
-			LOG.debug(String.format(
-					"Previously selected service instance %s was not available. Returning all the instances returned by delegate.",
-					previouslyReturnedInstance));
+			LOG.debug(String.format("Previously selected service instance %s was not available. Returning all the instances returned by delegate.", previouslyReturnedInstance));
 		}
+
+		/**
+		 * 如果本地选择的服务列表中不包含之前的，则清空之前的服务实例
+		 */
 		previouslyReturnedInstance = null;
 		return serviceInstances;
 	}
@@ -93,6 +99,9 @@ public class SameInstancePreferenceServiceInstanceListSupplier extends Delegatin
 	@Override
 	public void selectedServiceInstance(ServiceInstance serviceInstance) {
 		super.selectedServiceInstance(serviceInstance);
+		/**
+		 * 如果之前未选择过服务，或本次选择和上次不一致，则将上次更新为本次选择的服务
+		 */
 		if (previouslyReturnedInstance == null || !previouslyReturnedInstance.equals(serviceInstance)) {
 			previouslyReturnedInstance = serviceInstance;
 		}

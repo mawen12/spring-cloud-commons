@@ -17,7 +17,7 @@
 package org.springframework.cloud.client.serviceregistry;
 
 /**
- * Contract to register and deregister instances with a Service Registry.
+ * 提供服务实例注册注销、状态查询更新的功能
  *
  * @param <R> registration meta data
  * @author Spencer Gibb
@@ -26,26 +26,26 @@ package org.springframework.cloud.client.serviceregistry;
 public interface ServiceRegistry<R extends Registration> {
 
 	/**
-	 * Registers the registration. A registration typically has information about an
-	 * instance, such as its hostname and port.
+	 * 注册一个包含了实例信息的{@link Registration}，
 	 * @param registration registration meta data
 	 */
 	void register(R registration);
 
 	/**
-	 * Deregisters the registration.
+	 * 注销一个{@link Registration}
 	 * @param registration registration meta data
 	 */
 	void deregister(R registration);
 
 	/**
-	 * Closes the ServiceRegistry. This is a lifecycle method.
+	 * 关闭服务注册，这是一个生命周期函数
 	 */
 	void close();
 
 	/**
-	 * Sets the status of the registration. The status values are determined by the
-	 * individual implementations.
+	 * 设置{@link Registration}的状态，需要注意，{@link Registration}本身并未提供设置状态的方法。
+	 * Nacos的处理方案是将状态信息发送到Nacos Server上实例的{@code Instance#enabled}中
+	 *
 	 * @param registration The registration to update.
 	 * @param status The status to set.
 	 * @see org.springframework.cloud.client.serviceregistry.endpoint.ServiceRegistryEndpoint
@@ -54,6 +54,9 @@ public interface ServiceRegistry<R extends Registration> {
 
 	/**
 	 * Gets the status of a particular registration.
+	 * 获取特定的{@link Registration}状态。需要注意，{@link Registration}本身并未提供获取状态的方法。
+	 * Nacos的处理方案是从Nacos Server上获取实例的{@code Instance#enabled}值
+	 *
 	 * @param registration The registration to query.
 	 * @param <T> The type of the status.
 	 * @return The status of the registration.

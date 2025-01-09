@@ -22,8 +22,8 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.util.Assert;
 
 /**
- * Represents a {@link ServiceInstanceListSupplier} that uses a delegate
- * {@link ServiceInstanceListSupplier} instance underneath.
+ * 代理设计模式
+ * 基于代理实现的{@link ServiceInstanceListSupplier}，即通过代理查询服务实力列表
  *
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
@@ -32,6 +32,9 @@ import org.springframework.util.Assert;
 public abstract class DelegatingServiceInstanceListSupplier
 		implements ServiceInstanceListSupplier, SelectedInstanceCallback, InitializingBean, DisposableBean {
 
+	/**
+	 * 代理对象
+	 */
 	protected final ServiceInstanceListSupplier delegate;
 
 	public DelegatingServiceInstanceListSupplier(ServiceInstanceListSupplier delegate) {
@@ -51,6 +54,9 @@ public abstract class DelegatingServiceInstanceListSupplier
 	@Override
 	public void selectedServiceInstance(ServiceInstance serviceInstance) {
 		if (delegate instanceof SelectedInstanceCallback selectedInstanceCallbackDelegate) {
+			/**
+			 *
+			 */
 			selectedInstanceCallbackDelegate.selectedServiceInstance(serviceInstance);
 		}
 	}

@@ -21,14 +21,15 @@ import org.springframework.retry.backoff.BackOffPolicy;
 import org.springframework.retry.backoff.NoBackOffPolicy;
 
 /**
- * Factory class used to customize the retry functionality throughout Spring Cloud.
+ * 负载均衡重试工厂，用于构造请求失败的重试行为
  *
  * @author Ryan Baxter
  */
 public interface LoadBalancedRetryFactory {
 
 	/**
-	 * Creates a {@link LoadBalancedRetryPolicy}.
+	 * 创建特定服务的负载均衡重试策略，默认返回空策略
+	 *
 	 * @param service The ID of the service to create the retry policy for.
 	 * @param serviceInstanceChooser Used to get the next server from a load balancer.
 	 * @return A retry policy for the service.
@@ -38,7 +39,8 @@ public interface LoadBalancedRetryFactory {
 	}
 
 	/**
-	 * Creates an array of {@link RetryListener}s for a given service.
+	 * 创建特定服务的重试监听器数组，默认返回空数组
+	 *
 	 * @param service The service to create the {@link RetryListener}s for.
 	 * @return An array of {@link RetryListener}s.
 	 */
@@ -47,7 +49,8 @@ public interface LoadBalancedRetryFactory {
 	}
 
 	/**
-	 * Creates a {@link BackOffPolicy} for a given service.
+	 * 创建特定服务的回退策略，默认为无退避策略
+	 *
 	 * @param service The service to create the {@link BackOffPolicy} for.
 	 * @return The {@link BackOffPolicy}.
 	 */

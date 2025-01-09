@@ -50,7 +50,7 @@ import org.springframework.util.ReflectionUtils;
 import static org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer.REQUEST;
 
 /**
- * The default {@link LoadBalancerClient} implementation.
+ * 同步阻塞的{@link LoadBalancerClient}实现。
  *
  * @author Olga Maciaszek-Sharma
  * @since 2.2.0
@@ -144,6 +144,13 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 				DefaultRequestContext.class, Object.class, ServiceInstance.class);
 	}
 
+	/**
+	 * 使用指定服务实例和原始的URI，解析为带有ip:port的URI
+	 *
+	 * @param serviceInstance service instance to reconstruct the URI
+	 * @param original A URI with the host as a logical service name.
+	 * @return
+	 */
 	@Override
 	public URI reconstructURI(ServiceInstance serviceInstance, URI original) {
 		return LoadBalancerUriTools.reconstructURI(serviceInstance, original);

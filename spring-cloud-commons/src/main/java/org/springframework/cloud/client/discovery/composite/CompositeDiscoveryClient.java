@@ -26,8 +26,7 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 
 /**
- * A {@link DiscoveryClient} that is composed of other discovery clients and delegates
- * calls to each of them in order.
+ * 基于{@link DiscoveryClient}的实现，支持代理一组{@link DiscoveryClient}，并按顺序调用
  *
  * @author Biju Kunjummen
  * @author Olga Maciaszek-Sharma
@@ -35,9 +34,15 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
  */
 public class CompositeDiscoveryClient implements DiscoveryClient {
 
+	/**
+	 * 被代理的一组服务发现客户端
+	 */
 	private final List<DiscoveryClient> discoveryClients;
 
 	public CompositeDiscoveryClient(List<DiscoveryClient> discoveryClients) {
+		/**
+		 * 按{@link org.springframework.core.Ordered}排序
+		 */
 		AnnotationAwareOrderComparator.sort(discoveryClients);
 		this.discoveryClients = discoveryClients;
 	}
@@ -50,6 +55,9 @@ public class CompositeDiscoveryClient implements DiscoveryClient {
 	@Override
 	public List<ServiceInstance> getInstances(String serviceId) {
 		if (this.discoveryClients != null) {
+			/**
+			 * 依次从服务发现客户端获取实例，只有有一个有值，就直接返回
+			 */
 			for (DiscoveryClient discoveryClient : this.discoveryClients) {
 				List<ServiceInstance> instances = discoveryClient.getInstances(serviceId);
 				if (instances != null && !instances.isEmpty()) {
@@ -64,6 +72,9 @@ public class CompositeDiscoveryClient implements DiscoveryClient {
 	public List<String> getServices() {
 		LinkedHashSet<String> services = new LinkedHashSet<>();
 		if (this.discoveryClients != null) {
+			/**
+			 * 获取服务名称，将所有的服务发现客户端返回的服务名称进行汇总，并去重
+			 */
 			for (DiscoveryClient discoveryClient : this.discoveryClients) {
 				List<String> serviceForClient = discoveryClient.getServices();
 				if (serviceForClient != null) {
@@ -77,6 +88,9 @@ public class CompositeDiscoveryClient implements DiscoveryClient {
 	@Override
 	public void probe() {
 		if (this.discoveryClients != null) {
+			/**
+			 * 依次调用服务发现客户端的{@link DiscoveryClient#probe()}
+			 */
 			for (DiscoveryClient discoveryClient : this.discoveryClients) {
 				discoveryClient.probe();
 			}

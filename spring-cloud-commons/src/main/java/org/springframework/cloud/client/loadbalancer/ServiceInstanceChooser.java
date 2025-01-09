@@ -19,8 +19,7 @@ package org.springframework.cloud.client.loadbalancer;
 import org.springframework.cloud.client.ServiceInstance;
 
 /**
- * Implemented by classes which use a load balancer to choose a server to send a request
- * to.
+ * 配合负载均衡的实例选择器
  *
  * @author Ryan Baxter
  * @author Olga Maciaszek-Sharma
@@ -28,6 +27,8 @@ import org.springframework.cloud.client.ServiceInstance;
 public interface ServiceInstanceChooser {
 
 	/**
+	 * 从负载均衡器中为指定服务中选择一个实例
+	 *
 	 * Chooses a ServiceInstance from the LoadBalancer for the specified service.
 	 * @param serviceId The service ID to look up the LoadBalancer.
 	 * @return A ServiceInstance that matches the serviceId.
@@ -35,8 +36,8 @@ public interface ServiceInstanceChooser {
 	ServiceInstance choose(String serviceId);
 
 	/**
-	 * Chooses a ServiceInstance from the LoadBalancer for the specified service and
-	 * LoadBalancer request.
+	 * 从负载均衡器中为指定服务和指定负载均衡请求选择一个实例
+	 *
 	 * @param serviceId The service ID to look up the LoadBalancer.
 	 * @param request The request to pass on to the LoadBalancer
 	 * @param <T> The type of the request context.

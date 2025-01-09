@@ -23,6 +23,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 /**
+ * 自动服务注册的自动配置类，开启条件为：
+ * <ul>
+ *     <li>PROPERTIES(spring.cloud.service-registry.auto-registration.enabled)=true -> DEFAULT(true)</li>
+ * </ul>
+ * <p>
+ * 开启后，注册{@link AutoServiceRegistrationConfiguration}
+ *
  * @author Spencer Gibb
  */
 @Configuration(proxyBeanMethods = false)
@@ -38,9 +45,11 @@ public class AutoServiceRegistrationAutoConfiguration implements InitializingBea
 
 	@Override
 	public void afterPropertiesSet() {
+		/**
+		 * {@link AutoServiceRegistrationProperties#failFast}检查
+		 */
 		if (this.autoServiceRegistration == null && this.properties.isFailFast()) {
-			throw new IllegalStateException(
-					"Auto Service Registration has " + "been requested, but there is no AutoServiceRegistration bean");
+			throw new IllegalStateException("Auto Service Registration has " + "been requested, but there is no AutoServiceRegistration bean");
 		}
 	}
 

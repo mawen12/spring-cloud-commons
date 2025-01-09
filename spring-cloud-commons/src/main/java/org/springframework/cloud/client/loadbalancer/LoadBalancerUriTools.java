@@ -53,12 +53,18 @@ public final class LoadBalancerUriTools {
 	// https://github.com/spring-cloud/spring-cloud-gateway/blob/main/spring-cloud-gateway-core/
 	// src/main/java/org/springframework/cloud/gateway/support/ServerWebExchangeUtils.java
 	private static boolean containsEncodedParts(URI uri) {
+		/**
+		 * 查询部分是否包含%
+		 */
 		boolean encoded = (uri.getRawQuery() != null && uri.getRawQuery().contains(PERCENTAGE_SIGN))
 				|| (uri.getRawPath() != null && uri.getRawPath().contains(PERCENTAGE_SIGN))
 				|| (uri.getRawFragment() != null && uri.getRawFragment().contains(PERCENTAGE_SIGN));
 		// Verify if it is really fully encoded. Treat partial encoded as unencoded.
 		if (encoded) {
 			try {
+				/**
+				 * 如果包含，则对其进行解码
+				 */
 				UriComponentsBuilder.fromUri(uri).build(true);
 				return true;
 			}
@@ -93,16 +99,27 @@ public final class LoadBalancerUriTools {
 	}
 
 	private static URI doReconstructURI(ServiceInstance serviceInstance, URI original) {
+		/**
+		 * 获取目标服务实例的主机
+		 */
 		String host = serviceInstance.getHost();
-		String scheme = Optional.ofNullable(serviceInstance.getScheme())
-			.orElse(computeScheme(original, serviceInstance));
+		/**
+		 * 获取目标服务实例的协议(http/https)
+		 */
+		String scheme = Optional.ofNullable(serviceInstance.getScheme()).orElse(computeScheme(original, serviceInstance));
+		/**
+		 * 如果未指定端口，根据协议解析目标实例的端口，如果是http协议，则采用80，否则采用443
+		 */
 		int port = computePort(serviceInstance.getPort(), scheme);
-
-		if (Objects.equals(host, original.getHost()) && port == original.getPort()
-				&& Objects.equals(scheme, original.getScheme())) {
+		/**
+		 * 如果原始URI的ip, port, scheme和目标服务实例一致，表示其无需转换，则直接返回
+		 */
+		if (Objects.equals(host, original.getHost()) && port == original.getPort() && Objects.equals(scheme, original.getScheme())) {
 			return original;
 		}
-
+		/**
+		 * 使用{@link UriComponentsBuilder}来处理
+		 */
 		boolean encoded = containsEncodedParts(original);
 		return UriComponentsBuilder.fromUri(original).scheme(scheme).host(host).port(port).build(encoded).toUri();
 	}

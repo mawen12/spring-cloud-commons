@@ -21,6 +21,13 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration;
 
 /**
+ * 自动服务注册配置类，开启的条件如下：
+ * <ul>
+ *     <li>PROPERTIES(spring.cloud.service-registry.auto-registration.enabled)=true -> DEFAULT(true)</li>
+ * </ul>
+ * <p>
+ * 即只要引入该类所在的Jar,默认开启自动服务注册，并且读取PROPERTIES(spring.cloud.service-registry.auto-registration) -> AutoServiceRegistrationProperties
+ *
  * @author Spencer Gibb
  */
 @Configuration(proxyBeanMethods = false)

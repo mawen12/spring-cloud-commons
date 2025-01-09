@@ -20,7 +20,7 @@ import java.net.URI;
 import java.util.Map;
 
 /**
- * Represents an instance of a service in a discovery system.
+ * 代表服务发现系统中的一个服务实例
  *
  * @author Spencer Gibb
  * @author Tim Ysewyn
@@ -28,44 +28,44 @@ import java.util.Map;
 public interface ServiceInstance {
 
 	/**
-	 * @return The unique instance ID as registered.
+	 * @return 返回实例ID，每个实例都是唯一的
 	 */
 	default String getInstanceId() {
 		return null;
 	}
 
 	/**
-	 * @return The service ID as registered.
+	 * @return 返回服务ID
 	 */
 	String getServiceId();
 
 	/**
-	 * @return The hostname of the registered service instance.
+	 * @return 注册的服务实例的主机名
 	 */
 	String getHost();
 
 	/**
-	 * @return The port of the registered service instance.
+	 * @return 注册的服务实例的端口
 	 */
 	int getPort();
 
 	/**
-	 * @return Whether the port of the registered service instance uses HTTPS.
+	 * @return 注册的服务实例的端口是否使用HTTPS
 	 */
 	boolean isSecure();
 
 	/**
-	 * @return The service URI address.
+	 * @return 服务的URI地址
 	 */
 	URI getUri();
 
 	/**
-	 * @return The key / value pair metadata associated with the service instance.
+	 * @return 与服务实例相关联的元数据键值对
 	 */
 	Map<String, String> getMetadata();
 
 	/**
-	 * @return The scheme of the service instance.
+	 * @return 服务实例的scheme，即端口之前的内容
 	 */
 	default String getScheme() {
 		return null;

@@ -19,8 +19,7 @@ package org.springframework.cloud.loadbalancer.core;
 import org.springframework.cloud.client.ServiceInstance;
 
 /**
- * A callback interface that allows to pass the selected service instance data from the
- * LoadBalancer.
+ * 一个回调接口，允许传递从负载均衡器中选择的服务实例
  *
  * @author Olga Maciaszek-Sharma
  * @since 2.2.7
@@ -28,7 +27,8 @@ import org.springframework.cloud.client.ServiceInstance;
 public interface SelectedInstanceCallback {
 
 	/**
-	 * Passes the selected {@link ServiceInstance} as an argument.
+	 * 传递负载均衡器中选择的服务实例
+	 *
 	 * @param serviceInstance that has been selected
 	 */
 	void selectedServiceInstance(ServiceInstance serviceInstance);

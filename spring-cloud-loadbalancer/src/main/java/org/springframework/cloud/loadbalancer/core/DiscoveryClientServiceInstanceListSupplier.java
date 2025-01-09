@@ -35,7 +35,7 @@ import org.springframework.core.env.Environment;
 import static org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory.PROPERTY_NAME;
 
 /**
- * A discovery-client-based {@link ServiceInstanceListSupplier} implementation.
+ * 基于服务发现客户端的{@link ServiceInstanceListSupplier}实现，即所需的服务实例列表通过服务发现客户端来提供
  *
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
@@ -52,37 +52,73 @@ public class DiscoveryClientServiceInstanceListSupplier implements ServiceInstan
 
 	private static final Log LOG = LogFactory.getLog(DiscoveryClientServiceInstanceListSupplier.class);
 
+	/**
+	 * 超时事件，默认30s
+	 */
 	private Duration timeout = Duration.ofSeconds(30);
 
+	/**
+	 * 服务名称
+	 */
 	private final String serviceId;
 
+	/**
+	 * 保存从{@link DiscoveryClient}获取到的特定{@link #serviceId}实例列表
+	 */
 	private final Flux<List<ServiceInstance>> serviceInstances;
 
 	public DiscoveryClientServiceInstanceListSupplier(DiscoveryClient delegate, Environment environment) {
+		/**
+		 * 从 PROPERTIES(loadbalancer.client.name) 读取服务名称
+		 */
 		this.serviceId = environment.getProperty(PROPERTY_NAME);
+		/**
+		 * 解析超时时间，从 PROPERTIES(spring.cloud.loadbalancer.service-discovery.timeout) -> DEFAULT(30s)
+		 */
 		resolveTimeout(environment);
+		/**
+		 * 使用负载均衡客户端在超时时间内读取特定{@link #serviceId}的实例列表
+		 */
 		this.serviceInstances = Flux.defer(() -> Mono.fromCallable(() -> delegate.getInstances(serviceId)))
-			.timeout(timeout, Flux.defer(() -> {
-				logTimeout();
-				return Flux.just(new ArrayList<>());
-			}), Schedulers.boundedElastic())
-			.onErrorResume(error -> {
-				logException(error);
-				return Flux.just(new ArrayList<>());
-			});
+				.timeout(timeout, Flux.defer(() -> {
+					/**
+					 * 读取超时时，则写入DEBUG级别日志，并返回空实例列表
+					 */
+					logTimeout();
+					return Flux.just(new ArrayList<>());
+				}), Schedulers.boundedElastic())
+				.onErrorResume(error -> {
+					/**
+					 * 读取出现异常，则写入ERROR级别日志，并返回空实例列表
+					 */
+					logException(error);
+					return Flux.just(new ArrayList<>());
+				});
 	}
 
 	public DiscoveryClientServiceInstanceListSupplier(ReactiveDiscoveryClient delegate, Environment environment) {
+		/**
+		 * 从 PROPERTIES(loadbalancer.client.name) 读取服务名称
+		 */
 		this.serviceId = environment.getProperty(PROPERTY_NAME);
+		/**
+		 * 解析超时时间，从 PROPERTIES(spring.cloud.loadbalancer.service-discovery.timeout) -> DEFAULT(30s)
+		 */
 		resolveTimeout(environment);
-		this.serviceInstances = Flux
-			.defer(() -> delegate.getInstances(serviceId).collectList().flux().timeout(timeout, Flux.defer(() -> {
-				logTimeout();
-				return Flux.just(new ArrayList<>());
-			})).onErrorResume(error -> {
-				logException(error);
-				return Flux.just(new ArrayList<>());
-			}));
+		this.serviceInstances = Flux.defer(() -> delegate.getInstances(serviceId).collectList().flux()
+				.timeout(timeout, Flux.defer(() -> {
+					/**
+					 * 读取超时时，则写入DEBUG级别日志，并返回空实例列表
+					 */
+					logTimeout();
+					return Flux.just(new ArrayList<>());
+				})).onErrorResume(error -> {
+					/**
+					 * 读取出现异常，则写入ERROR级别日志，并返回空实例列表
+					 */
+					logException(error);
+					return Flux.just(new ArrayList<>());
+				}));
 	}
 
 	@Override
@@ -96,6 +132,9 @@ public class DiscoveryClientServiceInstanceListSupplier implements ServiceInstan
 	}
 
 	private void resolveTimeout(Environment environment) {
+		/**
+		 * 解析读取超时的时间，从 PROPERTIES(spring.cloud.loadbalancer.service-discovery.timeout) -> DEFAULT(30s)
+		 */
 		String providedTimeout = environment.getProperty(SERVICE_DISCOVERY_TIMEOUT);
 		if (providedTimeout != null) {
 			timeout = DurationStyle.detectAndParse(providedTimeout);
@@ -103,6 +142,9 @@ public class DiscoveryClientServiceInstanceListSupplier implements ServiceInstan
 	}
 
 	private void logTimeout() {
+		/**
+		 * 写入DEBUG级别日志
+		 */
 		if (LOG.isDebugEnabled()) {
 			LOG.debug(String.format("Timeout occurred while retrieving instances for service %s."
 					+ "The instances could not be retrieved during %s", serviceId, timeout));
@@ -110,6 +152,9 @@ public class DiscoveryClientServiceInstanceListSupplier implements ServiceInstan
 	}
 
 	private void logException(Throwable error) {
+		/**
+		 * 写入ERROR级别日志
+		 */
 		if (LOG.isErrorEnabled()) {
 			LOG.error(String.format("Exception occurred while retrieving instances for service %s", serviceId), error);
 		}

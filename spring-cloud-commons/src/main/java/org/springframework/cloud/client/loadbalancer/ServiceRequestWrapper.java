@@ -23,12 +23,20 @@ import org.springframework.http.HttpRequest;
 import org.springframework.http.client.support.HttpRequestWrapper;
 
 /**
+ * 微服务请求包装器，提供了将包含服务的请求，
+ *
  * @author Ryan Baxter
  */
 public class ServiceRequestWrapper extends HttpRequestWrapper {
 
+	/**
+	 * 请求的目标服务实例
+	 */
 	private final ServiceInstance instance;
 
+	/**
+	 * 负载均衡客户端
+	 */
 	private final LoadBalancerClient loadBalancer;
 
 	public ServiceRequestWrapper(HttpRequest request, ServiceInstance instance, LoadBalancerClient loadBalancer) {
@@ -39,6 +47,9 @@ public class ServiceRequestWrapper extends HttpRequestWrapper {
 
 	@Override
 	public URI getURI() {
+		/**
+		 * 将scheme://serviceName/path -> scheme://ip:port/path
+		 */
 		URI uri = this.loadBalancer.reconstructURI(this.instance, getRequest().getURI());
 		return uri;
 	}
