@@ -20,7 +20,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 /**
- * Configuration to import the {@link BootstrapImportSelector} configuration.
+ *
+ * 用于导入{@link BootstrapImportSelector}配置的配置
  *
  * @author Spencer Gibb
  */

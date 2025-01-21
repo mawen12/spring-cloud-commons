@@ -27,7 +27,9 @@ import org.springframework.util.StringUtils;
 import static org.springframework.cloud.bootstrap.config.PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME;
 
 /**
- * Enumerable wrapper for a property source.
+ * 代表Bootstrap的数据源，即Spring Cloud环境
+ *
+ * @see 
  *
  * @author Ryan Baxter
  */

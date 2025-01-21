@@ -20,10 +20,11 @@ import org.springframework.boot.BootstrapContext;
 import org.springframework.boot.BootstrapRegistry;
 import org.springframework.boot.BootstrapRegistryInitializer;
 import org.springframework.cloud.context.refresh.ConfigDataContextRefresher;
+import org.springframework.context.ConfigurableApplicationContext;
 
 /**
- * BootstrapRegistryInitializer that adds the BootstrapContext to the ApplicationContext
- * for use later in {@link ConfigDataContextRefresher}.
+ * Bootstrap注册初始器，在{@link org.springframework.boot.DefaultBootstrapContext#close(ConfigurableApplicationContext)}时，
+ * 将{@link BootstrapContext}注册到{@link org.springframework.context.ApplicationContext}
  *
  * @author Spencer Gibb
  * @since 3.0.3

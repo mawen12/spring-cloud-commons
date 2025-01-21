@@ -23,8 +23,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * A marker interface used as a key in <code>META-INF/spring.factories</code>. Entries in
- * the factories file are used to create the bootstrap application context.
+ * 被用于{@code META-INF/spring.factories}的标记接口。
+ * 该工厂文件中的类被用于创建 bootstrap application context。
  *
  * @author Dave Syer
  *

@@ -60,24 +60,27 @@ import static org.springframework.cloud.bootstrap.encrypt.AbstractEnvironmentDec
 import static org.springframework.core.env.StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME;
 
 /**
+ * 属性源Bootstrap配置
+ *
  * @author Dave Syer
  *
  */
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(PropertySourceBootstrapProperties.class)
-public class PropertySourceBootstrapConfiguration implements ApplicationListener<ContextRefreshedEvent>,
-		ApplicationContextInitializer<ConfigurableApplicationContext>, Ordered {
+public class PropertySourceBootstrapConfiguration implements ApplicationListener<ContextRefreshedEvent>, ApplicationContextInitializer<ConfigurableApplicationContext>, Ordered {
 
 	/**
 	 * Bootstrap property source name.
 	 */
-	public static final String BOOTSTRAP_PROPERTY_SOURCE_NAME = BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME
-			+ "Properties";
+	public static final String BOOTSTRAP_PROPERTY_SOURCE_NAME = BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME + "Properties";
 
 	private static Log logger = LogFactory.getLog(PropertySourceBootstrapConfiguration.class);
 
 	private int order = Ordered.HIGHEST_PRECEDENCE + 10;
 
+	/**
+	 * 属性源定位器集合，用于从环境中获取指定的属性源
+	 */
 	@Autowired(required = false)
 	private List<PropertySourceLocator> propertySourceLocators = new ArrayList<>();
 
@@ -102,29 +105,40 @@ public class PropertySourceBootstrapConfiguration implements ApplicationListener
 	 * spring.cloud.config.initialize-on-context-refresh is true this method provides a
 	 * "second fetch" of configuration data to fetch any additional configuration data
 	 * from profiles that have been activated.
+	 *
+	 * 在主应用上下文完成初始化后，
+	 *
 	 */
 	@Override
 	public void initialize(ConfigurableApplicationContext applicationContext) {
-		if (!bootstrapProperties.isInitializeOnContextRefresh() || !applicationContext.getEnvironment()
-			.getPropertySources()
-			.contains(BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
+		if (!bootstrapProperties.isInitializeOnContextRefresh() || !applicationContext.getEnvironment().getPropertySources().contains(BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
 			doInitialize(applicationContext);
 		}
 	}
 
+	/**
+	 * 对主应用的上下文进行初始化操作
+	 *
+	 * @param applicationContext
+	 */
 	private void doInitialize(ConfigurableApplicationContext applicationContext) {
 		List<PropertySource<?>> composite = new ArrayList<>();
+		// 对属性源进行排序
 		AnnotationAwareOrderComparator.sort(this.propertySourceLocators);
 		boolean empty = true;
+		// 获取主环境
 		ConfigurableEnvironment environment = applicationContext.getEnvironment();
 		for (PropertySourceLocator locator : this.propertySourceLocators) {
+			// 订阅主环境中的属性源集合
 			Collection<PropertySource<?>> source = locator.locateCollection(environment);
+			// 主环境为空，跳过处理
 			if (source == null || source.size() == 0) {
 				continue;
 			}
 			List<PropertySource<?>> sourceList = new ArrayList<>();
 			for (PropertySource<?> p : source) {
 				if (p instanceof EnumerablePropertySource<?> enumerable) {
+					// 对于可枚举的属性源，将其作为
 					sourceList.add(new BootstrapPropertySource<>(enumerable));
 				}
 				else {

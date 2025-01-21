@@ -27,7 +27,7 @@ import org.springframework.cloud.bootstrap.encrypt.TextEncryptorUtils;
 import org.springframework.util.ClassUtils;
 
 /**
- * Bootstrapper.
+ * 文件加密器配置引导程序
  *
  * @author Marcin Grzejszczak
  * @since 3.0.0
@@ -47,9 +47,11 @@ public class TextEncryptorConfigBootstrapper implements BootstrapRegistryInitial
 
 	@Override
 	public void initialize(BootstrapRegistry registry) {
+		// 如果没有处理TextEncryptor的类存在，则无需处理
 		if (!ClassUtils.isPresent("org.springframework.security.crypto.encrypt.TextEncryptor", null)) {
 			return;
 		}
+
 
 		registry.registerIfAbsent(KeyProperties.class,
 				context -> context.get(Binder.class)

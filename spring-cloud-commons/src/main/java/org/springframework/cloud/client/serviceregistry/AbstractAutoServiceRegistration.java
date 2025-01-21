@@ -37,10 +37,9 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.core.env.Environment;
 
 /**
- * Lifecycle methods that may be useful and common to {@link ServiceRegistry}
- * implementations.
+ * 对于{@link ServiceRegistry}实现来说可能有用且常见的生命周期方法
  *
- * TODO: Document the lifecycle.
+ * <p>在接收到{@link WebServerInitializedEvent}事件后触发当前服务的自动注册
  *
  * @param <R> Registration type passed to the {@link ServiceRegistry}.
  * @author Spencer Gibb
@@ -53,18 +52,39 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 
 	private final ServiceRegistry<R> serviceRegistry;
 
+	/**
+	 * 是否自动启动状态标识，默认为自动启动
+	 */
 	private final boolean autoStartup = true;
 
+	/**
+	 * 运行状态标识
+	 */
 	private final AtomicBoolean running = new AtomicBoolean(false);
 
+	/**
+	 * 执行顺序标识
+	 */
 	private final int order = 0;
 
+	/**
+	 * 服务注册的端口
+	 */
 	private final AtomicInteger port = new AtomicInteger(0);
 
+	/**
+	 * 应用上下文
+	 */
 	private ApplicationContext context;
 
+	/**
+	 * 环境
+	 */
 	private Environment environment;
 
+	/**
+	 * 自动服务注册属性类，提供自动服务注册期间的行为
+	 */
 	private AutoServiceRegistrationProperties properties;
 
 	private List<RegistrationManagementLifecycle<R>> registrationManagementLifecycles = new ArrayList<>();
@@ -115,7 +135,9 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 				return;
 			}
 		}
+		// 更新端口为本地启动的Web服务端口
 		this.port.compareAndSet(0, event.getWebServer().getPort());
+		// 启动服务注册
 		this.start();
 	}
 

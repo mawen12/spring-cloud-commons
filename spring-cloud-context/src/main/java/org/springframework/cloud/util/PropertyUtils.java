@@ -46,10 +46,12 @@ public abstract class PropertyUtils {
 	}
 
 	public static boolean bootstrapEnabled(Environment environment) {
+		// 读取是否启动Bootstrap，从 ENVIRONMENT(spring.cloud.bootstrap.enabled) -> DEFAULT(false) || CLASS(org.springframework.cloud.bootstrap.marker.Marker)
 		return environment.getProperty(BOOTSTRAP_ENABLED_PROPERTY, Boolean.class, false) || MARKER_CLASS_EXISTS;
 	}
 
 	public static boolean useLegacyProcessing(Environment environment) {
+		// 读取是否旧式处理，从 ENVIRONMENT(spring.config.use-legacy-processing) -> DEFAULT(false)
 		return environment.getProperty(USE_LEGACY_PROCESSING_PROPERTY, Boolean.class, false);
 	}
 

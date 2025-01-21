@@ -24,12 +24,20 @@ import org.springframework.core.style.ToStringCreator;
 import org.springframework.util.Assert;
 
 /**
+ * 基于负载均衡客户端的规范
+ *
  * @author Dave Syer
  */
 public class LoadBalancerClientSpecification implements NamedContextFactory.Specification {
 
+	/**
+	 * 服务名称
+	 */
 	private String name;
 
+	/**
+	 * 负载均衡相关的配置类
+	 */
 	private Class<?>[] configuration;
 
 	public LoadBalancerClientSpecification() {

@@ -44,6 +44,9 @@ import org.springframework.util.StringUtils;
  * {@link DeferredImportSelector} so {@code @Conditional} annotations on imported classes
  * are supported.
  *
+ * 使用{@link SpringFactoriesLoader}从{@code META-INF/spring.factories}来加载{@link BootstrapConfiguration}注解相关的类。
+ *
+ *
  * @author Spencer Gibb
  */
 public class BootstrapImportSelector implements EnvironmentAware, DeferredImportSelector {
@@ -59,24 +62,28 @@ public class BootstrapImportSelector implements EnvironmentAware, DeferredImport
 
 	@Override
 	public String[] selectImports(AnnotationMetadata annotationMetadata) {
+		// 获取类加载器
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		// Use names and ensure unique to protect against duplicates
-		List<String> names = new ArrayList<>(
-				SpringFactoriesLoader.loadFactoryNames(BootstrapConfiguration.class, classLoader));
-		names.addAll(Arrays.asList(StringUtils
-			.commaDelimitedListToStringArray(this.environment.getProperty("spring.cloud.bootstrap.sources", ""))));
+		// 从 META-INF/spring.factories中获取BootstrapConfiguration的值
+		List<String> names = new ArrayList<>(SpringFactoriesLoader.loadFactoryNames(BootstrapConfiguration.class, classLoader));
+		// 将属性中ENVIRONMENT(spring.cloud.bootstrap.sources)去除，再使用,分隔，加入到集合中
+		names.addAll(Arrays.asList(StringUtils.commaDelimitedListToStringArray(this.environment.getProperty("spring.cloud.bootstrap.sources", ""))));
 
 		List<OrderedAnnotatedElement> elements = new ArrayList<>();
 		for (String name : names) {
 			try {
+				// 将其转换为支持排序的注解元素
 				elements.add(new OrderedAnnotatedElement(this.metadataReaderFactory, name));
 			}
 			catch (IOException e) {
 				continue;
 			}
 		}
+		// 排序
 		AnnotationAwareOrderComparator.sort(elements);
 
+		// 转换为数组
 		String[] classNames = elements.stream().map(e -> e.name).toArray(String[]::new);
 
 		return classNames;

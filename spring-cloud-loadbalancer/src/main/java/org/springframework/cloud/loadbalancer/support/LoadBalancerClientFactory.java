@@ -35,9 +35,8 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.Environment;
 
 /**
- * A factory that creates client, load balancer and client configuration instances. It
- * creates a Spring ApplicationContext per client name, and extracts the beans that it
- * needs from there.
+ * 用于创建客户端、负载均衡器和客户端配置实例的工厂，它为每个客户端名称创建一个{@link org.springframework.context.ApplicationContext}，
+ * 并从其获取需要的Bean
  *
  * @author Spencer Gibb
  * @author Dave Syer
@@ -49,15 +48,18 @@ public class LoadBalancerClientFactory extends NamedContextFactory<LoadBalancerC
 	private static final Log log = LogFactory.getLog(LoadBalancerClientFactory.class);
 
 	/**
-	 * Property source name for load balancer.
+	 * 负载均衡器的属性源名称
 	 */
 	public static final String NAMESPACE = "loadbalancer";
 
 	/**
-	 * Property for client name within the load balancer namespace.
+	 * 负载均衡器命名空间内的客户端名称的属性
 	 */
 	public static final String PROPERTY_NAME = NAMESPACE + ".client.name";
 
+	/**
+	 * 负载均衡器客户端相关属性
+	 */
 	private final LoadBalancerClientsProperties properties;
 
 	public LoadBalancerClientFactory(LoadBalancerClientsProperties properties) {
@@ -65,46 +67,58 @@ public class LoadBalancerClientFactory extends NamedContextFactory<LoadBalancerC
 		this.properties = properties;
 	}
 
-	public LoadBalancerClientFactory(LoadBalancerClientsProperties properties,
-			Map<String, ApplicationContextInitializer<GenericApplicationContext>> applicationContextInitializers) {
+	public LoadBalancerClientFactory(LoadBalancerClientsProperties properties, Map<String, ApplicationContextInitializer<GenericApplicationContext>> applicationContextInitializers) {
 		super(LoadBalancerClientConfiguration.class, NAMESPACE, PROPERTY_NAME, applicationContextInitializers);
 		this.properties = properties;
 	}
 
+	/**
+	 * @param environment
+	 * @return 返回客户端名称，此处为服务Id
+	 */
 	public static String getName(Environment environment) {
 		return environment.getProperty(PROPERTY_NAME);
 	}
 
+	/**
+	 * 从{@link org.springframework.context.ApplicationContext}获取该服务名称的{@link ReactorServiceInstanceLoadBalancer}
+	 *
+	 * @param serviceId 服务名称
+	 * @return
+	 */
 	@Override
 	public ReactiveLoadBalancer<ServiceInstance> getInstance(String serviceId) {
 		return getInstance(serviceId, ReactorServiceInstanceLoadBalancer.class);
 	}
 
+	/**
+	 * 获取对应服务名称的属性
+	 *
+	 * @param serviceId 服务名称
+	 * @return
+	 */
 	@Override
 	public LoadBalancerProperties getProperties(String serviceId) {
 		if (properties == null) {
 			if (log.isWarnEnabled()) {
 				log.warn("LoadBalancerClientsProperties is null. Please use the new constructor.");
 			}
+			// 未设置属性时，返回空
 			return null;
 		}
+		// 服务名称为空，或者服务名称不存在，返回默认的属性
 		if (serviceId == null || !properties.getClients().containsKey(serviceId)) {
 			// no specific client properties, return default
 			return properties;
 		}
-		// because specifics are overlayed on top of defaults, everything in `properties`,
-		// unless overridden, is in `clientsProperties`
+		// 返回归属该服务的属性，该属性是从默认属性扩展而来的，如果未指定部分属性，则返回默认值
 		return properties.getClients().get(serviceId);
 	}
 
 	@SuppressWarnings("unchecked")
-	public LoadBalancerClientFactory withApplicationContextInitializers(
-			Map<String, Object> applicationContextInitializers) {
+	public LoadBalancerClientFactory withApplicationContextInitializers(Map<String, Object> applicationContextInitializers) {
 		Map<String, ApplicationContextInitializer<GenericApplicationContext>> convertedInitializers = new HashMap<>();
-		applicationContextInitializers.keySet()
-			.forEach(contextId -> convertedInitializers.put(contextId,
-					(ApplicationContextInitializer<GenericApplicationContext>) applicationContextInitializers
-						.get(contextId)));
+		applicationContextInitializers.keySet().forEach(contextId -> convertedInitializers.put(contextId, (ApplicationContextInitializer<GenericApplicationContext>) applicationContextInitializers.get(contextId)));
 		return new LoadBalancerClientFactory(properties, convertedInitializers);
 	}
 

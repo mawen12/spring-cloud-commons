@@ -19,7 +19,7 @@ package org.springframework.cloud.bootstrap.config;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * Properties for Spring Cloud Config bootstrap.
+ * 用于Spring Cloud Config的启动属性类
  *
  * @author Dave Syer
  */
@@ -27,15 +27,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class PropertySourceBootstrapProperties {
 
 	/**
-	 * Flag to indicate that the external properties should override system properties.
-	 * Default true.
+	 * 指明外部属性是否可以覆盖系统属性的标识
 	 */
 	private boolean overrideSystemProperties = true;
 
 	/**
-	 * Flag to indicate that {@link #isOverrideSystemProperties()
-	 * systemPropertiesOverride} can be used. Set to false to prevent users from changing
-	 * the default accidentally. Default true.
+	 * 指明{@link #overrideSystemProperties}是否去可以起效的标识，默认为true，代表用户可以覆盖默认配置。
 	 */
 	private boolean allowOverride = true;
 
@@ -44,11 +41,13 @@ public class PropertySourceBootstrapProperties {
 	 * true, external properties should take lowest priority and should not override any
 	 * existing property sources (including local config files). Default false. This will
 	 * only have an effect when using config first bootstrap.
+	 *
+	 * 指明当{@link #allowOverride}为true时，外部属性应该是最低优先级，并不允许覆盖任何已经存在的属性源，包括本地配置文件。默认为false
 	 */
 	private boolean overrideNone = false;
 
 	/**
-	 * Flag to initialize bootstrap configuration on context refresh event. Default false.
+	 * 是否在接收到{@link org.springframework.context.event.ContextRefreshedEvent}时初始化启动配置的标识，默认为false
 	 */
 	private boolean initializeOnContextRefresh = false;
 

@@ -32,7 +32,7 @@ import org.springframework.cloud.client.loadbalancer.Response;
 import org.springframework.util.function.SingletonSupplier;
 
 /**
- * A random-based implementation of {@link ReactorServiceInstanceLoadBalancer}.
+ * 基于随机算法的{@link ReactorServiceInstanceLoadBalancer}实现
  *
  * @author Olga Maciaszek-Sharma
  * @author Nan Chiu

@@ -23,7 +23,7 @@ import org.springframework.cloud.client.loadbalancer.Response;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 
 /**
- * A Reactor based implementation of {@link ReactiveLoadBalancer}.
+ * 基于Reactor的{@link ReactiveLoadBalancer}实现
  *
  * @param <T> - type of the response
  * @author Spencer Gibb
@@ -31,7 +31,8 @@ import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalanc
 public interface ReactorLoadBalancer<T> extends ReactiveLoadBalancer<T> {
 
 	/**
-	 * Choose the next server based on the load balancing algorithm.
+	 * 基于负载均衡算法选择下一个服务实例
+	 *
 	 * @param request - an input request
 	 * @return - mono of response
 	 */

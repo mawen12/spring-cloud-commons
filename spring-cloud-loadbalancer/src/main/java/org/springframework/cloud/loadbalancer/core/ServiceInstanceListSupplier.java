@@ -25,15 +25,24 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.Request;
 
 /**
- * A {@link Supplier} of lists of {@link ServiceInstance} objects.
+ * 封装了服务实例列表的{@link Supplier}
  *
  * @author Olga Maciaszek-Sharma
  * @since 2.2.0
  */
 public interface ServiceInstanceListSupplier extends Supplier<Flux<List<ServiceInstance>>> {
 
+	/**
+	 * @return 返回服务名称
+	 */
 	String getServiceId();
 
+	/**
+	 * 获取指定请求的服务实例列表
+	 *
+	 * @param request 请求
+	 * @return 默认返回所有的服务实例
+	 */
 	default Flux<List<ServiceInstance>> get(Request request) {
 		return get();
 	}

@@ -36,6 +36,8 @@ import org.springframework.core.env.StandardEnvironment;
 import static org.springframework.cloud.util.PropertyUtils.BOOTSTRAP_ENABLED_PROPERTY;
 
 /**
+ * 旧版上下文刷新器
+ *
  * @author Dave Syer
  * @author Venil Noronha
  */
@@ -56,27 +58,32 @@ public class LegacyContextRefresher extends ContextRefresher {
 		addConfigFilesToEnvironment();
 	}
 
-	/* For testing. */ ConfigurableApplicationContext addConfigFilesToEnvironment() {
+	/* For testing. */
+	ConfigurableApplicationContext addConfigFilesToEnvironment() {
 		ConfigurableApplicationContext capture = null;
 		try {
+			// 从当前上下文复制进包含默认属性和action + default 的profile，并返回新环境
 			StandardEnvironment environment = copyEnvironment(getContext().getEnvironment());
 
 			Map<String, Object> map = new HashMap<>();
+			// 禁用jmx
 			map.put("spring.jmx.enabled", false);
+			// 置空主类
 			map.put("spring.main.sources", "");
 			// gh-678 without this apps with this property set to REACTIVE or SERVLET fail
+			// 置空web应用类型
 			map.put("spring.main.web-application-type", "NONE");
+			// 启动Bootstrap
 			map.put(BOOTSTRAP_ENABLED_PROPERTY, Boolean.TRUE.toString());
+			// 将其添加到最高优先级
 			environment.getPropertySources().addFirst(new MapPropertySource(REFRESH_ARGS_PROPERTY_SOURCE, map));
 
+			// 构造新的SpringApplication，用来使用环境
 			SpringApplicationBuilder builder = new SpringApplicationBuilder(Empty.class).bannerMode(Banner.Mode.OFF)
 				.web(WebApplicationType.NONE)
 				.environment(environment);
-			// Just the listeners that affect the environment (e.g. excluding logging
-			// listener because it has side effects)
-			builder.application()
-				.setListeners(Arrays.asList(new BootstrapApplicationListener(),
-						new BootstrapConfigFileApplicationListener()));
+			// 仅注册和环境相关的监听器，排除log监听器，因为其有影响
+			builder.application().setListeners(Arrays.asList(new BootstrapApplicationListener(), new BootstrapConfigFileApplicationListener()));
 			capture = builder.run();
 			if (environment.getPropertySources().contains(REFRESH_ARGS_PROPERTY_SOURCE)) {
 				environment.getPropertySources().remove(REFRESH_ARGS_PROPERTY_SOURCE);

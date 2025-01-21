@@ -22,11 +22,9 @@ import java.util.Map;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * A {@link ConfigurationProperties} bean for Spring Cloud Loadbalancer.
+ * 用于Spring Cloud LoadBalancer的配置属性Bean。
  *
- * Individual clients are configured via the {@link LoadBalancerClientsProperties#clients}
- * field. Defaults and other properties are located in the {@link LoadBalancerProperties}
- * base class.
+ * <p>各个客户端通过{@link LoadBalancerClientsProperties#clients}进行配置。默认值和其他属性位于{@link LoadBalancerProperties}基类中。
  *
  * @author Spencer Gibb
  * @since 3.1.0

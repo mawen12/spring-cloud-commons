@@ -45,8 +45,7 @@ import org.springframework.core.env.Environment;
 @Configuration(proxyBeanMethods = false)
 @LoadBalancerClients
 @EnableConfigurationProperties({ LoadBalancerClientsProperties.class, LoadBalancerEagerLoadProperties.class })
-@AutoConfigureBefore({ ReactorLoadBalancerClientAutoConfiguration.class,
-		LoadBalancerBeanPostProcessorAutoConfiguration.class })
+@AutoConfigureBefore({ ReactorLoadBalancerClientAutoConfiguration.class, LoadBalancerBeanPostProcessorAutoConfiguration.class })
 @ConditionalOnProperty(value = "spring.cloud.loadbalancer.enabled", havingValue = "true", matchIfMissing = true)
 public class LoadBalancerAutoConfiguration {
 
@@ -58,22 +57,19 @@ public class LoadBalancerAutoConfiguration {
 
 	@ConditionalOnMissingBean
 	@Bean
-	public LoadBalancerClientFactory loadBalancerClientFactory(LoadBalancerClientsProperties properties,
-			ObjectProvider<List<LoadBalancerClientSpecification>> configurations) {
+	public LoadBalancerClientFactory loadBalancerClientFactory(LoadBalancerClientsProperties properties, ObjectProvider<List<LoadBalancerClientSpecification>> configurations) {
 		LoadBalancerClientFactory clientFactory = new LoadBalancerClientFactory(properties);
 		clientFactory.setConfigurations(configurations.getIfAvailable(Collections::emptyList));
 		return clientFactory;
 	}
 
 	@Bean
-	public LoadBalancerEagerContextInitializer loadBalancerEagerContextInitializer(
-			LoadBalancerClientFactory clientFactory, LoadBalancerEagerLoadProperties properties) {
+	public LoadBalancerEagerContextInitializer loadBalancerEagerContextInitializer(LoadBalancerClientFactory clientFactory, LoadBalancerEagerLoadProperties properties) {
 		return new LoadBalancerEagerContextInitializer(clientFactory, properties.getClients());
 	}
 
 	@Bean
-	static LoadBalancerChildContextInitializer loadBalancerChildContextInitializer(
-			LoadBalancerClientFactory loadBalancerClientFactory, ApplicationContext parentContext) {
+	static LoadBalancerChildContextInitializer loadBalancerChildContextInitializer(LoadBalancerClientFactory loadBalancerClientFactory, ApplicationContext parentContext) {
 		return new LoadBalancerChildContextInitializer(loadBalancerClientFactory, parentContext);
 	}
 

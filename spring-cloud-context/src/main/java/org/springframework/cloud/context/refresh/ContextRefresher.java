@@ -43,6 +43,8 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.context.support.StandardServletEnvironment;
 
 /**
+ * 支持上下文刷新
+ *
  * @author Dave Syer
  * @author Venil Noronha
  */
@@ -56,6 +58,18 @@ public abstract class ContextRefresher {
 			// order matters, if cli args aren't first, things get messy
 			CommandLinePropertySource.COMMAND_LINE_PROPERTY_SOURCE_NAME, "defaultProperties" };
 
+	/**
+	 * 标准属性源名称集合
+	 *
+	 * <ul>
+	 *     <li>systemProperties</li>
+	 *     <li>systemEnvironment</li>
+	 *     <li>jndiProperties</li>
+	 *     <li>servletConfigInitParams</li>
+	 *     <li>servletContextInitParams</li>
+	 *     <li>configurationProperties</li>
+	 * </ul>
+	 */
 	protected Set<String> standardSources = new HashSet<>(
 			Arrays.asList(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME,
 					StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
@@ -75,8 +89,7 @@ public abstract class ContextRefresher {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected ContextRefresher(ConfigurableApplicationContext context, RefreshScope scope,
-			RefreshAutoConfiguration.RefreshProperties properties) {
+	protected ContextRefresher(ConfigurableApplicationContext context, RefreshScope scope, RefreshAutoConfiguration.RefreshProperties properties) {
 		this.context = context;
 		this.scope = scope;
 		additionalPropertySourcesToRetain = properties.getAdditionalPropertySourcesToRetain();
@@ -90,16 +103,26 @@ public abstract class ContextRefresher {
 		return this.scope;
 	}
 
+	/**
+	 * 刷新上下文
+	 *
+	 * @return
+	 */
 	public synchronized Set<String> refresh() {
+		//
 		Set<String> keys = refreshEnvironment();
 		this.scope.refreshAll();
 		return keys;
 	}
 
 	public synchronized Set<String> refreshEnvironment() {
+		// 将所有的属性源展开平铺
 		Map<String, Object> before = extract(this.context.getEnvironment().getPropertySources());
+		// 更新环境
 		updateEnvironment();
+		// 将前后发生变化的key提取出来
 		Set<String> keys = changes(before, extract(this.context.getEnvironment().getPropertySources())).keySet();
+		// 发送环境变化事件，其中仅包含发生变化的key
 		this.context.publishEvent(new EnvironmentChangeEvent(this.context, keys));
 		return keys;
 	}
@@ -108,11 +131,19 @@ public abstract class ContextRefresher {
 
 	// Don't use ConfigurableEnvironment.merge() in case there are clashes with property
 	// source names
+
+	/**
+	 * 从输入的环境中复制覆盖了默认属性，以及profile
+	 *
+	 * @param input
+	 * @return
+	 */
 	protected StandardEnvironment copyEnvironment(ConfigurableEnvironment input) {
+		// 构造一个标准环境
 		StandardEnvironment environment = new StandardEnvironment();
+		// 获取新环境的属性源，用于保存来自输入的属性源信息
 		MutablePropertySources capturedPropertySources = environment.getPropertySources();
-		// Only copy the default property source(s) and the profiles over from the main
-		// environment (everything else should be pristine, just like it was on startup).
+		// 仅从主环境复制默认属性源和配置文件，其他的属性是可以更改的
 		List<String> propertySourcesToRetain = new ArrayList<>(Arrays.asList(DEFAULT_PROPERTY_SOURCES));
 		if (!CollectionUtils.isEmpty(additionalPropertySourcesToRetain)) {
 			propertySourcesToRetain.addAll(additionalPropertySourcesToRetain);
@@ -121,14 +152,18 @@ public abstract class ContextRefresher {
 		for (String name : propertySourcesToRetain) {
 			if (input.getPropertySources().contains(name)) {
 				if (capturedPropertySources.contains(name)) {
+					// 对于用户已提供的默认数据，进行替换
 					capturedPropertySources.replace(name, input.getPropertySources().get(name));
 				}
 				else {
+					// 用户未提供，将该属性作为最低优先级
 					capturedPropertySources.addLast(input.getPropertySources().get(name));
 				}
 			}
 		}
+		// 复制激活的profile
 		environment.setActiveProfiles(input.getActiveProfiles());
+		// 复制默认的profile
 		environment.setDefaultProfiles(input.getDefaultProfiles());
 		return environment;
 	}
@@ -162,13 +197,16 @@ public abstract class ContextRefresher {
 	}
 
 	private Map<String, Object> extract(MutablePropertySources propertySources) {
+		// 倒序处理主要是最先加入的值会被覆盖掉
 		Map<String, Object> result = new HashMap<>();
 		List<PropertySource<?>> sources = new ArrayList<>();
 		for (PropertySource<?> source : propertySources) {
+			// 倒序添加
 			sources.add(0, source);
 		}
 		for (PropertySource<?> source : sources) {
 			if (!this.standardSources.contains(source.getName())) {
+				// 仅处理非标准属性源
 				extract(source, result);
 			}
 		}
@@ -179,10 +217,12 @@ public abstract class ContextRefresher {
 		if (parent instanceof CompositePropertySource) {
 			try {
 				List<PropertySource<?>> sources = new ArrayList<>();
+				// 对于复合的属性源，将其进行迭代，并倒序添加
 				for (PropertySource<?> source : ((CompositePropertySource) parent).getPropertySources()) {
 					sources.add(0, source);
 				}
 				for (PropertySource<?> source : sources) {
+					// 处理可能复合的一个数据源本身也是复合的场景
 					extract(source, result);
 				}
 			}
@@ -191,6 +231,7 @@ public abstract class ContextRefresher {
 			}
 		}
 		else if (parent instanceof EnumerablePropertySource) {
+			// 对于可枚举的属性源，直接保存到哈希表中
 			for (String key : ((EnumerablePropertySource<?>) parent).getPropertyNames()) {
 				result.put(key, parent.getProperty(key));
 			}

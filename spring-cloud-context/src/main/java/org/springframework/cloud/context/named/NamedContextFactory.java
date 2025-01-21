@@ -47,9 +47,9 @@ import org.springframework.core.env.MapPropertySource;
 import org.springframework.util.Assert;
 
 /**
- * Creates a set of child contexts that allows a set of Specifications to define the beans
- * in each child context. Ported from spring-cloud-netflix FeignClientFactory and
- * SpringClientFactory
+ * 创建一组上下文，允许一组规范定义每个子上下文中的bean。
+ *
+ * <p>从 Spring Cloud Netflix的FeignClientFactory和SpringClientFactory移植而来
  *
  * @param <C> specification
  * @author Spencer Gibb
@@ -62,16 +62,34 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 
 	private final Map<String, ApplicationContextInitializer<GenericApplicationContext>> applicationContextInitializers;
 
+	/**
+	 * 属性源名称
+	 */
 	private final String propertySourceName;
 
+	/**
+	 * 属性名称
+	 */
 	private final String propertyName;
 
-	private final Map<String, GenericApplicationContext> contexts = new ConcurrentHashMap<>();
+	/**
+	 * 服务与应用上下文表
+	 */
+	private final Map<String/* 服务名称 */, GenericApplicationContext/* Spring 应用上下文 */> contexts = new ConcurrentHashMap<>();
 
-	private final Map<String, C> configurations = new ConcurrentHashMap<>();
+	/**
+	 * 服务与配置表
+	 */
+	private final Map<String/* 服务名称 */, C> configurations = new ConcurrentHashMap<>();
 
+	/**
+	 * 父应用上下文
+	 */
 	private ApplicationContext parent;
 
+	/**
+	 * 默认配置类型
+	 */
 	private final Class<?> defaultConfigType;
 
 	public NamedContextFactory(Class<?> defaultConfigType, String propertySourceName, String propertyName) {
@@ -105,20 +123,29 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 		return new HashSet<>(this.contexts.keySet());
 	}
 
+	/**
+	 * 在应用关闭时，将内置的{@link #contexts}同时关闭
+	 */
 	@Override
 	public void destroy() {
 		Collection<GenericApplicationContext> values = this.contexts.values();
 		for (GenericApplicationContext context : values) {
-			// This can fail, but it never throws an exception (you see stack traces
-			// logged as WARN).
+			// 关闭应用上下文，可能存在关闭失败的情况，但是不应该抛出异常
 			context.close();
 		}
 		this.contexts.clear();
 	}
 
+	/**
+	 * @param name 服务名称
+	 * @return 返回对应服务的应用上下文，如果不存在，则创建并返回
+	 */
 	protected GenericApplicationContext getContext(String name) {
+		// 首次检查
 		if (!this.contexts.containsKey(name)) {
+			// 加锁
 			synchronized (this.contexts) {
+				// 二次检查
 				if (!this.contexts.containsKey(name)) {
 					this.contexts.put(name, createContext(name));
 				}
@@ -158,36 +185,40 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 		registry.register(PropertyPlaceholderAutoConfiguration.class, this.defaultConfigType);
 	}
 
+	/**
+	 * @param name 服务名称
+	 * @return 创建特定服务的应用上下文
+	 */
 	public GenericApplicationContext buildContext(String name) {
 		// https://github.com/spring-cloud/spring-cloud-netflix/issues/3101
 		// https://github.com/spring-cloud/spring-cloud-openfeign/issues/475
 		ClassLoader classLoader = getClass().getClassLoader();
 		GenericApplicationContext context;
 		if (this.parent != null) {
+			// 创建可列出的BeanFactory
 			DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 			if (parent instanceof ConfigurableApplicationContext) {
-				beanFactory.setBeanClassLoader(
-						((ConfigurableApplicationContext) parent).getBeanFactory().getBeanClassLoader());
+				// 设置Bean的类加载器
+				beanFactory.setBeanClassLoader(((ConfigurableApplicationContext) parent).getBeanFactory().getBeanClassLoader());
 			}
 			else {
+				// 使用当前类的类加载器作为Bean的类加载器
 				beanFactory.setBeanClassLoader(classLoader);
 			}
-			context = AotDetector.useGeneratedArtifacts() ? new GenericApplicationContext(beanFactory)
-					: new AnnotationConfigApplicationContext(beanFactory);
+			context = AotDetector.useGeneratedArtifacts() ? new GenericApplicationContext(beanFactory) : new AnnotationConfigApplicationContext(beanFactory);
 		}
 		else {
-			context = AotDetector.useGeneratedArtifacts() ? new GenericApplicationContext()
-					: new AnnotationConfigApplicationContext();
+			context = AotDetector.useGeneratedArtifacts() ? new GenericApplicationContext() : new AnnotationConfigApplicationContext();
 		}
+		// 设置类加载器
 		context.setClassLoader(classLoader);
-		context.getEnvironment()
-			.getPropertySources()
-			.addFirst(
-					new MapPropertySource(this.propertySourceName, Collections.singletonMap(this.propertyName, name)));
+		// 写入第一个属性源，PropertySource<属性源名称, Map<属性名, 服务名称>>
+		context.getEnvironment().getPropertySources().addFirst(new MapPropertySource(this.propertySourceName, Collections.singletonMap(this.propertyName, name)));
 		if (this.parent != null) {
-			// Uses Environment from parent as well as beans
+			// 使用来自父级的bean和环境
 			context.setParent(this.parent);
 		}
+		// 设置上下文名称，格式为NameContextFactory-name
 		context.setDisplayName(generateDisplayName(name));
 		return context;
 	}
@@ -197,8 +228,10 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 	}
 
 	public <T> T getInstance(String name, Class<T> type) {
+		// 获取指定服务的上下文
 		GenericApplicationContext context = getContext(name);
 		try {
+			// 获取上下文中的Bean
 			return context.getBean(type);
 		}
 		catch (NoSuchBeanDefinitionException e) {
@@ -261,12 +294,18 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 	}
 
 	/**
-	 * Specification with name and configuration.
+	 * 包含名称和配置的规范
 	 */
 	public interface Specification {
 
+		/**
+		 * @return 返回服务名称
+		 */
 		String getName();
 
+		/**
+		 * @return 返回相关配置类集合
+		 */
 		Class<?>[] getConfiguration();
 
 	}

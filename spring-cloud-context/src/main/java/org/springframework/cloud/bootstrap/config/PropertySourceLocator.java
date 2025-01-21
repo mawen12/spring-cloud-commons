@@ -26,9 +26,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertySource;
 
 /**
- * Strategy for locating (possibly remote) property sources for the Environment.
- * Implementations should not fail unless they intend to prevent the application from
- * starting.
+ * 用于环境的属性源订阅的策略。除非实现意图阻止应用程序启动，否则实现不应该失败
  *
  * @author Dave Syer
  *
@@ -36,8 +34,8 @@ import org.springframework.core.env.PropertySource;
 public interface PropertySourceLocator {
 
 	/**
-	 * @param environment The current Environment.
-	 * @return A PropertySource, or null if there is none.
+	 * @param environment 当前环境
+	 * @return 返回一个属性源
 	 * @throws IllegalStateException if there is a fail-fast condition.
 	 */
 	PropertySource<?> locate(Environment environment);
@@ -47,11 +45,15 @@ public interface PropertySourceLocator {
 	}
 
 	static Collection<PropertySource<?>> locateCollection(PropertySourceLocator locator, Environment environment) {
+		// 定位到的属性源
 		PropertySource<?> propertySource = locator.locate(environment);
 		if (propertySource == null) {
+			// 空属性源，返回空集合
 			return Collections.emptyList();
 		}
+		// 复合属性源
 		if (propertySource instanceof CompositePropertySource) {
+			// 迭代出内部的属性源集合，并加入到新集合中，再返回
 			Collection<PropertySource<?>> sources = ((CompositePropertySource) propertySource).getPropertySources();
 			List<PropertySource<?>> filteredSources = new ArrayList<>();
 			for (PropertySource<?> p : sources) {

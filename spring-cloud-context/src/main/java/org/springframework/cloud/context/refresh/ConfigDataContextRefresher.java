@@ -41,6 +41,8 @@ import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 
 /**
+ * 配置数据上下文刷新器
+ *
  * @author Dave Syer
  * @author Venil Noronha
  */
@@ -54,8 +56,7 @@ public class ConfigDataContextRefresher extends ContextRefresher
 		super(context, scope);
 	}
 
-	public ConfigDataContextRefresher(ConfigurableApplicationContext context, RefreshScope scope,
-			RefreshAutoConfiguration.RefreshProperties properties) {
+	public ConfigDataContextRefresher(ConfigurableApplicationContext context, RefreshScope scope, RefreshAutoConfiguration.RefreshProperties properties) {
 		super(context, scope, properties);
 	}
 

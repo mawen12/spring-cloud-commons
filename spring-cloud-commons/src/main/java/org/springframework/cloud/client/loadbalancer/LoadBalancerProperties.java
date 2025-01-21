@@ -36,7 +36,7 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * The base configuration bean for Spring Cloud LoadBalancer.
+ * 负载均衡属性，用于Spring Cloud LoadBalancer的基础配置Bean
  *
  * See {@link LoadBalancerClientsProperties} for the {@link ConfigurationProperties}
  * annotation.
