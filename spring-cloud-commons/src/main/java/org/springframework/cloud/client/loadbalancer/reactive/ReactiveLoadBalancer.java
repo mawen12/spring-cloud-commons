@@ -60,19 +60,16 @@ public interface ReactiveLoadBalancer<T> {
 	interface Factory<T> {
 
 		/**
-		 * 返回特定服务ID的负载均衡属性
-		 *
-		 * @param serviceId
-		 * @return
+		 * @param serviceId 服务名称
+		 * @return 返回特定服务ID的负载均衡属性
 		 */
 		default LoadBalancerProperties getProperties(String serviceId) {
 			return null;
 		}
 
 		/**
-		 * 返回特定服务的复杂均衡实例
-		 * @param serviceId
-		 * @return
+		 * @param serviceId 服务名称
+		 * @return 返回特定服务的负载均衡器
 		 */
 		ReactiveLoadBalancer<T> getInstance(String serviceId);
 

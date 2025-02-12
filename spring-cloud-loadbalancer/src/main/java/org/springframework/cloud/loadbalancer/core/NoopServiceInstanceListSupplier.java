@@ -43,9 +43,7 @@ public class NoopServiceInstanceListSupplier implements ServiceInstanceListSuppl
 
 	@Override
 	public Flux<List<ServiceInstance>> get(Request request) {
-		/**
-		 * 仅返回空集合
-		 */
+		// 仅返回空集合
 		return Flux.defer(() -> Flux.just(Collections.emptyList()));
 	}
 

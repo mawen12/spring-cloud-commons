@@ -45,8 +45,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
- * A Builder for creating a {@link ServiceInstanceListSupplier} hierarchy to be used in
- * {@link ReactorLoadBalancer} configuration.
+ * 用于创建{@link ServiceInstanceListSupplier}层级对象，该对象被用于{@link ReactorLoadBalancer}
  *
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
@@ -66,18 +65,19 @@ public final class ServiceInstanceListSupplierBuilder {
 	}
 
 	/**
-	 * Sets a blocking {@link DiscoveryClient}-based
-	 * {@link DiscoveryClientServiceInstanceListSupplier} as a base
-	 * {@link ServiceInstanceListSupplier} in the hierarchy.
+	 * 将基于阻塞的{@link DiscoveryClient} {@link DiscoveryClientServiceInstanceListSupplier}
+	 * 设置为层次结构中的基础{@link ServiceInstanceListSupplier}
+	 *
 	 * @return the {@link ServiceInstanceListSupplierBuilder} object
 	 */
 	public ServiceInstanceListSupplierBuilder withBlockingDiscoveryClient() {
 		if (baseCreator != null && LOG.isWarnEnabled()) {
 			LOG.warn("Overriding a previously set baseCreator with a blocking DiscoveryClient baseCreator.");
 		}
-		this.baseCreator = context -> {
+		this.baseCreator = context/*根据客户端名称所创建的应用上下文*/ -> {
+			// 获取注册的服务发现客户端，其底层实现有Nacos, Eureka, Consul
 			DiscoveryClient discoveryClient = context.getBean(DiscoveryClient.class);
-
+			// 构造可提供对应服务实例列表的对象
 			return new DiscoveryClientServiceInstanceListSupplier(discoveryClient, context.getEnvironment());
 		};
 		return this;

@@ -26,10 +26,18 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.StringUtils;
 
 /**
+ * 扫描{@link LoadBalancerClients}注解的类，并进行注册
+ *
  * @author Dave Syer
+ * @see LoadBalancerClient
+ * @see LoadBalancerClients
  */
 public class LoadBalancerClientConfigurationRegistrar implements ImportBeanDefinitionRegistrar {
 
+	/**
+	 * @param client
+	 * @return 解析 {@link LoadBalancerClient#value()}或{@link LoadBalancerClient#name()}的值
+	 */
 	private static String getClientName(Map<String, Object> client) {
 		if (client == null) {
 			return null;
@@ -44,34 +52,36 @@ public class LoadBalancerClientConfigurationRegistrar implements ImportBeanDefin
 		throw new IllegalStateException("Either 'name' or 'value' must be provided in @LoadBalancerClient");
 	}
 
-	private static void registerClientConfiguration(BeanDefinitionRegistry registry, Object name,
-			Object configuration) {
-		BeanDefinitionBuilder builder = BeanDefinitionBuilder
-			.genericBeanDefinition(LoadBalancerClientSpecification.class);
+	private static void registerClientConfiguration(BeanDefinitionRegistry registry, Object name, Object configuration) {
+		BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(LoadBalancerClientSpecification.class);
 		builder.addConstructorArgValue(name);
 		builder.addConstructorArgValue(configuration);
+		// 注册Bean定义
 		registry.registerBeanDefinition(name + ".LoadBalancerClientSpecification", builder.getBeanDefinition());
 	}
 
 	@Override
 	public void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
+		// 读取LoadBalancerClients注解属性
 		Map<String, Object> attrs = metadata.getAnnotationAttributes(LoadBalancerClients.class.getName());
-		if (attrs != null && attrs.containsKey("value")) {
+		if (attrs != null && attrs.containsKey("value")) {// 处理属性值value
 			AnnotationAttributes[] clients = (AnnotationAttributes[]) attrs.get("value");
 			for (AnnotationAttributes client : clients) {
+				// 注册LoadBalancerClientSpecification
 				registerClientConfiguration(registry, getClientName(client), client.get("configuration"));
 			}
 		}
-		if (attrs != null && attrs.containsKey("defaultConfiguration")) {
+		if (attrs != null && attrs.containsKey("defaultConfiguration")) {// 处理属性值defaultConfiguration
 			String name;
 			if (metadata.hasEnclosingClass()) {
 				name = "default." + metadata.getEnclosingClassName();
-			}
-			else {
+			} else {
 				name = "default." + metadata.getClassName();
 			}
+			// 注册默认的配置类
 			registerClientConfiguration(registry, name, attrs.get("defaultConfiguration"));
 		}
+		// 读取LoadBalancerClient注解属性
 		Map<String, Object> client = metadata.getAnnotationAttributes(LoadBalancerClient.class.getName());
 		String name = getClientName(client);
 		if (name != null) {

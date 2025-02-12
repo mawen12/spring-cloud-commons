@@ -28,7 +28,7 @@ import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 
 /**
- * 基于权重来扩展委托提供{@link ServiceInstanceListSupplier}的实现
+ * 基于权重的{@link ServiceInstanceListSupplier}实现
  *
  * @author Zhuozhi Ji
  * @author Olga Maciaszek-Sharma
@@ -38,7 +38,7 @@ public class WeightedServiceInstanceListSupplier extends DelegatingServiceInstan
 	private static final Log LOG = LogFactory.getLog(WeightedServiceInstanceListSupplier.class);
 
 	/**
-	 * 实例元信息中的权重的key
+	 * 元信息中的权重的key
 	 */
 	static final String METADATA_WEIGHT_KEY = "weight";
 

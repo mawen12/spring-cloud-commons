@@ -53,6 +53,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
+ * Load balancer 客户端配置
+ *
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
  * @author Tim Ysewyn
@@ -68,11 +70,11 @@ public class LoadBalancerClientConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
-	public ReactorLoadBalancer<ServiceInstance> reactorServiceInstanceLoadBalancer(Environment environment,
-			LoadBalancerClientFactory loadBalancerClientFactory) {
+	public ReactorLoadBalancer<ServiceInstance> reactorServiceInstanceLoadBalancer(Environment environment, LoadBalancerClientFactory loadBalancerClientFactory) {
+		// 读取 PROPERTIES(loadbalancer.client.name) 属性值
 		String name = environment.getProperty(LoadBalancerClientFactory.PROPERTY_NAME);
-		return new RoundRobinLoadBalancer(
-				loadBalancerClientFactory.getLazyProvider(name, ServiceInstanceListSupplier.class), name);
+		// 构造基于轮询的LoadBalancer
+		return new RoundRobinLoadBalancer(loadBalancerClientFactory.getLazyProvider(name, ServiceInstanceListSupplier.class), name);
 	}
 
 	@Configuration(proxyBeanMethods = false)

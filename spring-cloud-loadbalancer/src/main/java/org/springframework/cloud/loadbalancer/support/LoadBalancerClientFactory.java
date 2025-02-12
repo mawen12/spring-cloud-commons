@@ -35,9 +35,10 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.Environment;
 
 /**
- * A factory that creates client, load balancer and client configuration instances. It
- * creates a Spring ApplicationContext per client name, and extracts the beans that it
- * needs from there.
+ * 用于创建负载均衡客户端、客户端配置实例的工厂。它为每个客户端名称都创建一个{@link ApplicationContext}，
+ * 并从中提取需要的Bean
+ *
+ * <p>
  *
  * @author Spencer Gibb
  * @author Dave Syer

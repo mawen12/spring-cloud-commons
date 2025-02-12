@@ -32,7 +32,9 @@ import org.springframework.cloud.client.loadbalancer.Response;
 import org.springframework.util.function.SingletonSupplier;
 
 /**
- * 基于{@link ReactorServiceInstanceLoadBalancer}的随机选择实现
+ * 基于随机算法实现的{@link ReactorServiceInstanceLoadBalancer}
+ *
+ * <p>底层主要通过{@link ServiceInstanceListSupplier}获取服务实例列表
  *
  * @author Olga Maciaszek-Sharma
  * @author Nan Chiu
@@ -48,7 +50,7 @@ public class RandomLoadBalancer implements ReactorServiceInstanceLoadBalancer {
 	private final String serviceId;
 
 	/**
-	 * 提供获取服务实例列表的单例提供其
+	 * 提供获取服务实例列表的单例提供
 	 */
 	private final SingletonSupplier<ServiceInstanceListSupplier> serviceInstanceListSingletonSupplier;
 
@@ -57,30 +59,27 @@ public class RandomLoadBalancer implements ReactorServiceInstanceLoadBalancer {
 	 * {@link ServiceInstanceListSupplier} that will be used to get available instances
 	 * @param serviceId id of the service for which to choose an instance
 	 */
-	public RandomLoadBalancer(ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
-			String serviceId) {
+	public RandomLoadBalancer(ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider, String serviceId) {
 		this.serviceId = serviceId;
-		this.serviceInstanceListSingletonSupplier = SingletonSupplier
-			.of(() -> serviceInstanceListSupplierProvider.getIfAvailable(NoopServiceInstanceListSupplier::new));
+		this.serviceInstanceListSingletonSupplier = SingletonSupplier.of(() -> serviceInstanceListSupplierProvider.getIfAvailable(NoopServiceInstanceListSupplier::new));
 	}
 
 	@SuppressWarnings("rawtypes")
 	@Override
 	public Mono<Response<ServiceInstance>> choose(Request request) {
-		/**
-		 * 获取服务实例列表
-		 */
+		// 获取服务实例列表提供器
 		ServiceInstanceListSupplier supplier = serviceInstanceListSingletonSupplier.obtain();
-
+		// 获取服务实例
 		return supplier.get(request)
 			.next()
+			// 触发SelectedInstanceCallback回调
 			.map(serviceInstances -> processInstanceResponse(supplier, serviceInstances));
 	}
 
-	private Response<ServiceInstance> processInstanceResponse(ServiceInstanceListSupplier supplier,
-			List<ServiceInstance> serviceInstances) {
+	private Response<ServiceInstance> processInstanceResponse(ServiceInstanceListSupplier supplier, List<ServiceInstance> serviceInstances) {
+		// 获取带有实例的响应
 		Response<ServiceInstance> serviceInstanceResponse = getInstanceResponse(serviceInstances);
-		if (supplier instanceof SelectedInstanceCallback && serviceInstanceResponse.hasServer()) {
+		if (supplier instanceof SelectedInstanceCallback && serviceInstanceResponse.hasServer()) {// 如果存在回调，并且存在服务器，则执行回调
 			((SelectedInstanceCallback) supplier).selectedServiceInstance(serviceInstanceResponse.getServer());
 		}
 		return serviceInstanceResponse;
@@ -93,6 +92,7 @@ public class RandomLoadBalancer implements ReactorServiceInstanceLoadBalancer {
 			}
 			return new EmptyResponse();
 		}
+		// 线程本地随机算法
 		int index = ThreadLocalRandom.current().nextInt(instances.size());
 
 		ServiceInstance instance = instances.get(index);

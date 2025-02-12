@@ -24,12 +24,23 @@ import org.springframework.core.style.ToStringCreator;
 import org.springframework.util.Assert;
 
 /**
+ * {@link LoadBalancerClient} 注解对应的类
+ *
  * @author Dave Syer
+ * @see LoadBalancerClient
+ * @see LoadBalancerClients
  */
 public class LoadBalancerClientSpecification implements NamedContextFactory.Specification {
 
+	/**
+	 * @see LoadBalancerClient#name()
+	 * @see LoadBalancerClient#value()
+	 */
 	private String name;
 
+	/**
+	 * @see LoadBalancerClient#configuration()
+	 */
 	private Class<?>[] configuration;
 
 	public LoadBalancerClientSpecification() {

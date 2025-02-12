@@ -22,8 +22,7 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.util.Assert;
 
 /**
- * 代理设计模式
- * 基于代理实现的{@link ServiceInstanceListSupplier}，即通过代理查询服务实力列表
+ * 基于装饰器设计模式实现的{@link ServiceInstanceListSupplier}，即通过代理查询服务实力列表
  *
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
@@ -54,9 +53,6 @@ public abstract class DelegatingServiceInstanceListSupplier
 	@Override
 	public void selectedServiceInstance(ServiceInstance serviceInstance) {
 		if (delegate instanceof SelectedInstanceCallback selectedInstanceCallbackDelegate) {
-			/**
-			 *
-			 */
 			selectedInstanceCallbackDelegate.selectedServiceInstance(serviceInstance);
 		}
 	}
