@@ -38,9 +38,6 @@ import org.springframework.web.client.RestTemplate;
 /**
  * 负载均衡属性，用于Spring Cloud LoadBalancer的基础配置Bean
  *
- * See {@link LoadBalancerClientsProperties} for the {@link ConfigurationProperties}
- * annotation.
- *
  * @author Olga Maciaszek-Sharma
  * @author Gandhimathi Velusamy
  * @author Zhuozhi Ji
@@ -49,7 +46,9 @@ import org.springframework.web.client.RestTemplate;
 public class LoadBalancerProperties {
 
 	/**
-	 * Properties for <code>HealthCheckServiceInstanceListSupplier</code>.
+	 * 健康检查配置
+	 *
+	 * <p>{@code HealthCheckServiceInstanceListSupplier}
 	 */
 	private HealthCheck healthCheck = new HealthCheck();
 
@@ -61,8 +60,9 @@ public class LoadBalancerProperties {
 	private Map<String, String> hint = new LinkedCaseInsensitiveMap<>();
 
 	/**
-	 * Allows setting the name of the header used for passing the hint for hint-based
-	 * service instance filtering.
+	 * 允许设置用于实现基于hint服务实例时，所用hint的请求头属性名
+	 *
+	 * <p>{@code HintBasedServiceInstanceListSupplier}
 	 */
 	private String hintHeaderName = "X-SC-LB-Hint";
 
@@ -77,15 +77,12 @@ public class LoadBalancerProperties {
 	private StickySession stickySession = new StickySession();
 
 	/**
-	 * If this flag is set to {@code true},
-	 * {@code ServiceInstanceListSupplier#get(Request request)} method will be implemented
-	 * to call {@code delegate.get(request)} in classes assignable from
-	 * {@code DelegatingServiceInstanceListSupplier} that don't already implement that
-	 * method, with the exclusion of {@code CachingServiceInstanceListSupplier} and
-	 * {@code HealthCheckServiceInstanceListSupplier}, which should be placed in the
-	 * instance supplier hierarchy directly after the supplier performing instance
-	 * retrieval over the network, before any request-based filtering is done,
-	 * {@code true} by default.
+	 * 如果设置为{@code true}，{@code ServiceInstanceListSupplier#get(Request)}
+	 * 将被实现为在实现了{@code DelegatingServiceInstanceListSupplier}类中调用{@code delete#get(request)}。
+	 * 除了{@code CachingServiceInstanceListSupplier}和{@code HealthCheckServiceInstanceListSupplier}以外，
+	 * 这些类应该其他supplier通过网络获取到服务实例之后，并且在基于请求过滤完成之前。
+	 *
+	 * <p>{@code DelegatingServiceInstanceListSupplier}及其子类
 	 */
 	private boolean callGetWithRequestOnDelegates = true;
 

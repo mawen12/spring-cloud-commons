@@ -24,8 +24,7 @@ import java.util.Queue;
 import org.springframework.cloud.client.ServiceInstance;
 
 /**
- * A {@link List} implementation that lazily fills weighted {@link ServiceInstance}
- * objects.
+ * 延迟填充基于权重的{@link ServiceInstance}对象
  *
  * @author Zhuozhi Ji
  * @see WeightedServiceInstanceListSupplier
@@ -41,9 +40,9 @@ class LazyWeightedServiceInstanceList extends AbstractList<ServiceInstance> {
 	private volatile int position = 0;
 
 	LazyWeightedServiceInstanceList(List<ServiceInstance> instances, int[] weights) {
-		// Calculate the greatest common divisor (GCD) of weights, and the
-		// total number of elements after expansion.
+		// 所有权重的最大公约数
 		int greatestCommonDivisor = 0;
+		// 权重总和
 		int total = 0;
 		for (int weight : weights) {
 			greatestCommonDivisor = greatestCommonDivisor(greatestCommonDivisor, weight);

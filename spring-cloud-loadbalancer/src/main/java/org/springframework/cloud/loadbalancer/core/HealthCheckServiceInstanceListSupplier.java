@@ -36,9 +36,7 @@ import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalanc
 import org.springframework.util.StringUtils;
 
 /**
- * A {@link ServiceInstanceListSupplier} implementation that verifies whether the
- * instances are alive and only returns the healthy one, unless there are none. Uses a
- * user-provided function to ping the <code>health</code> endpoint of the instances.
+ * 用于验证实例健康状态，并只返回健康状态的实例。该类使用通过提供的函数来检查实例的健康断点。
  *
  * @author Olga Maciaszek-Sharma
  * @author Roman Matiushchenko
